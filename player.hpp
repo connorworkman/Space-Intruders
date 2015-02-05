@@ -19,10 +19,10 @@ class Player {
 		Player();
 		void handleEvent(SDL_Event& e);
 		void move();
-		int getPlayerHorizontalPosit();
+		int getPlayerPositX();
 		void render();
 	private:
-		int playerHorizontalPosit;
-		int playerVerticalPosit;
-		int playerHorizontalVelocity;
+		int playerPositX;
+		int playerPositY;
+		int playerVelocX;
 };

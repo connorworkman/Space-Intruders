@@ -10,12 +10,12 @@ class PlayerLazer {
 		static const int LAZER_WIDTH = 5;
 		static const int LAZER_HEIGHT = 5;
 		PlayerLazer();//set player lazer defaults
-		void setPlayerLazerPosit(int playerLocationWhenFiring);
+		void setPlayerLazerPositX(int playerLocationWhenFiring);
 		void handleEvent(SDL_Event& e);
-		void playerLazerMove();
+		void move();
 		void render();
 	private:
-		int playerLazerHorizontalPosit;
-		int playerLazerVerticalPosit;
-		int playerLazerVerticalVelocity;
+		int playerLazerPositX;
+		int playerLazerPositY;
+		int playerLazerVelocY;
 };

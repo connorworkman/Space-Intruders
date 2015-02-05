@@ -77,45 +77,45 @@ int ImageTexture::getWidth() {return sdlTextureWidth;}
 int ImageTexture::getHeight() {return sdlTextureHeight;}
 
 Player::Player() {
-    playerHorizontalPosit = SCREEN_WIDTH/2;
-    playerVerticalPosit = SCREEN_HEIGHT-20;
-    playerHorizontalVelocity = 0;
+    playerPositX = SCREEN_WIDTH/2;
+    playerPositY = SCREEN_HEIGHT-20;
+    playerVelocX = 0;
 }
 
 void Player::handleEvent( SDL_Event& e ) {
 	if(e.type == SDL_KEYDOWN && e.key.repeat == 0) {//keypress occurrs
         	switch( e.key.keysym.sym ) {
 			case SDLK_LEFT:
-				playerHorizontalVelocity -= PLAYER_VEL;
+				playerVelocX -= PLAYER_VEL;
 				break;
 			case SDLK_RIGHT:
-				playerHorizontalVelocity += PLAYER_VEL;
+				playerVelocX += PLAYER_VEL;
 				break;
     		}
 	}
 	else if(e.type == SDL_KEYUP && e.key.repeat == 0) {//keypress is released
 		switch(e.key.keysym.sym) {
 			case SDLK_LEFT:
-				playerHorizontalVelocity += PLAYER_VEL;
+				playerVelocX += PLAYER_VEL;
 				break;
 			case SDLK_RIGHT:
-				playerHorizontalVelocity -= PLAYER_VEL;
+				playerVelocX -= PLAYER_VEL;
 				break;
         	}
     	}
 }
 
 void Player::move() {
-    playerHorizontalPosit += playerHorizontalVelocity;
-    //keep the player on the screen by correcting by playerHorizontalVelocity
-    if((playerHorizontalPosit < 0) || (playerHorizontalPosit + PLAYER_WIDTH > SCREEN_WIDTH)) {
-        playerHorizontalPosit -= playerHorizontalVelocity;
+    playerPositX += playerVelocX;
+    //keep the player on the screen by correcting by playerVelocX
+    if((playerPositX < 0) || (playerPositX + PLAYER_WIDTH > SCREEN_WIDTH)) {
+        playerPositX -= playerVelocX;
     }
 }
 
-int Player::getPlayerHorizontalPosit() {return playerHorizontalPosit;}
+int Player::getPlayerPositX() {return playerPositX;}
 
-void Player::render() {playerTexture.render(playerHorizontalPosit, playerVerticalPosit);}
+void Player::render() {playerTexture.render(playerPositX, playerPositY);}
 
 Alien::Alien() {
 	alienHorizontalPosit = 0;
@@ -130,26 +130,26 @@ void Alien::setAlienPosit(int alienNumber) {
 void Alien::render() {alienTexture.render(alienHorizontalPosit, alienVerticalPosit);}
 
 PlayerLazer::PlayerLazer() {
-	playerLazerHorizontalPosit = 0;
-	playerLazerVerticalPosit = 480;
-	playerLazerVerticalVelocity = 0;
+	playerLazerPositX = 0;
+	playerLazerPositY = 480;
+	playerLazerVelocY = 0;
 }
 
-void PlayerLazer::setPlayerLazerPosit(int playerHorizontalPositWhenFiring) {playerLazerHorizontalPosit = playerHorizontalPositWhenFiring+10;}
+void PlayerLazer::setPlayerLazerPositX(int playerPositXWhenFiring) {playerLazerPositX = playerPositXWhenFiring+10;}
 
-void PlayerLazer::playerLazerMove() {playerLazerVerticalPosit -= playerLazerVerticalVelocity;}
+void PlayerLazer::move() {playerLazerPositY -= playerLazerVelocY;}
 
 void PlayerLazer::handleEvent(SDL_Event& e) {
 	if(e.type = SDL_KEYDOWN && e.key.repeat == 0) {
 		switch(e.key.keysym.sym) {
 			case SDLK_UP:
-				playerLazerVerticalVelocity += 2;	
+				playerLazerVelocY += 2;	
 				break;
 		}
 	}
 }
 
-void PlayerLazer::render() {playerLazerTexture.render(playerLazerHorizontalPosit, playerLazerVerticalPosit);}
+void PlayerLazer::render() {playerLazerTexture.render(playerLazerPositX, playerLazerPositY);}
 
 void init() {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -205,10 +205,10 @@ int main(int argc, char* args[]) {
 			}
 			playerInstance.handleEvent(event);
 			playerLazerInstance.handleEvent(event);
-			playerLazerInstance.setPlayerLazerPosit(playerInstance.getPlayerHorizontalPosit());
+			playerLazerInstance.setPlayerLazerPositX(playerInstance.getPlayerPositX());
 		}
 		playerInstance.move();
-		playerLazerInstance.playerLazerMove();
+		playerLazerInstance.move();
 		--scrollingOffset;
 		if(scrollingOffset < -backgroundTexture.getWidth()) {
 			scrollingOffset = 0;
