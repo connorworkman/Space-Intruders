@@ -31,15 +31,12 @@ ImageTexture backgroundTexture;
 ImageTexture alienTexture;
 ImageTexture playerLazerTexture;
 //TODO add explosion textures, enemy lazer textures, additional enemy textures
-
 ImageTexture::ImageTexture() {
 	sdlTexture = NULL;
 	sdlTextureWidth = 0;
 	sdlTextureHeight = 0;
 }
-
 ImageTexture::~ImageTexture() {free();}
-
 bool ImageTexture::loadFromFile(std::string path) {
 	free();//free previous load before attempting new load
 	SDL_Texture* newTexture = NULL;
@@ -61,18 +58,13 @@ void ImageTexture::free() {
 		sdlTextureHeight = 0;
 	}
 }
-
 void ImageTexture::setColorMode(Uint8 red, Uint8 green, Uint8 blue) {SDL_SetTextureColorMod(sdlTexture, red, green, blue);}
-
 void ImageTexture::setBlendMode(SDL_BlendMode blending) {SDL_SetTextureBlendMode(sdlTexture, blending);}
-
 void ImageTexture::setAlphaMode(Uint8 alpha){SDL_SetTextureAlphaMod(sdlTexture, alpha);}
-
 void ImageTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
-	SDL_Rect renderRect = { x, y, sdlTextureWidth, sdlTextureHeight };
+	SDL_Rect renderRect = {x, y, sdlTextureWidth, sdlTextureHeight};
 	SDL_RenderCopyEx(renderer, sdlTexture, clip, &renderRect, angle, center, flip);
 }
-
 int ImageTexture::getWidth() {return sdlTextureWidth;}
 int ImageTexture::getHeight() {return sdlTextureHeight;}
 
@@ -81,10 +73,9 @@ Player::Player() {
     playerPositY = SCREEN_HEIGHT-20;
     playerVelocX = 0;
 }
-
-void Player::handleEvent( SDL_Event& e ) {
-	if(e.type == SDL_KEYDOWN && e.key.repeat == 0) {//keypress occurrs
-        	switch( e.key.keysym.sym ) {
+void Player::handleEvent( SDL_Event& event ) {
+	if(event.type == SDL_KEYDOWN && event.key.repeat == 0) {//keypress occurrs
+        	switch( event.key.keysym.sym ) {
 			case SDLK_LEFT:
 				playerVelocX -= PLAYER_VEL;
 				break;
@@ -93,8 +84,8 @@ void Player::handleEvent( SDL_Event& e ) {
 				break;
     		}
 	}
-	else if(e.type == SDL_KEYUP && e.key.repeat == 0) {//keypress is released
-		switch(e.key.keysym.sym) {
+	else if(event.type == SDL_KEYUP && event.key.repeat == 0) {//keypress is released
+		switch(event.key.keysym.sym) {
 			case SDLK_LEFT:
 				playerVelocX += PLAYER_VEL;
 				break;
@@ -104,7 +95,6 @@ void Player::handleEvent( SDL_Event& e ) {
         	}
     	}
 }
-
 void Player::move() {
     playerPositX += playerVelocX;
     //keep the player on the screen by correcting by playerVelocX
@@ -112,21 +102,17 @@ void Player::move() {
         playerPositX -= playerVelocX;
     }
 }
-
 int Player::getPlayerPositX() {return playerPositX;}
-
 void Player::render() {playerTexture.render(playerPositX, playerPositY);}
 
 Alien::Alien() {
 	alienHorizontalPosit = 0;
 	alienVerticalPosit = 0;
 }
-
 void Alien::setAlienPosit(int alienNumber) {
 	alienHorizontalPosit = (((alienNumber/5))*30) + 20;
 	alienVerticalPosit = ((alienNumber%10)+1)*30;
 }
-
 void Alien::render() {alienTexture.render(alienHorizontalPosit, alienVerticalPosit);}
 
 PlayerLazer::PlayerLazer() {
@@ -134,11 +120,8 @@ PlayerLazer::PlayerLazer() {
 	playerLazerPositY = 480;
 	playerLazerVelocY = 0;
 }
-
 void PlayerLazer::setPlayerLazerPositX(int playerPositXWhenFiring) {playerLazerPositX = playerPositXWhenFiring+10;}
-
 void PlayerLazer::move() {playerLazerPositY -= playerLazerVelocY;}
-
 void PlayerLazer::handleEvent(SDL_Event& e) {
 	if(e.type = SDL_KEYDOWN && e.key.repeat == 0) {
 		switch(e.key.keysym.sym) {
@@ -148,7 +131,6 @@ void PlayerLazer::handleEvent(SDL_Event& e) {
 		}
 	}
 }
-
 void PlayerLazer::render() {playerLazerTexture.render(playerLazerPositX, playerLazerPositY);}
 
 void init() {
@@ -163,14 +145,12 @@ void init() {
 	int imgFlags = IMG_INIT_PNG;
 	IMG_Init(imgFlags);
 }
-
 void loadMedia() {
 	playerTexture.loadFromFile("images/player.bmp");
 	backgroundTexture.loadFromFile("images/space.png");
 	alienTexture.loadFromFile("images/alien.bmp");
 	playerLazerTexture.loadFromFile("images/playerLazer.bmp");
 }
-
 void close() {
 	playerTexture.free();
 	backgroundTexture.free();
@@ -183,7 +163,6 @@ void close() {
 	IMG_Quit();//quit SDL_Image and SDL (subfunctions)
 	SDL_Quit();
 }
-
 int main(int argc, char* args[]) {
 	init();
 	loadMedia();
