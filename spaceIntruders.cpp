@@ -6,6 +6,7 @@
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string>
+#include <iostream>
 #include "imageTexture.hpp"
 #include "player.hpp"
 #include "alien.hpp"
@@ -116,20 +117,27 @@ void Alien::setAlienPosit(int alienNumber) {
 void Alien::render() {alienTexture.render(alienHorizontalPosit, alienVerticalPosit);}
 
 PlayerLazer::PlayerLazer() {
+	fired = 0;
 	playerLazerPositX = 0;
 	playerLazerPositY = 480;
 	playerLazerVelocY = 0;
 }
-void PlayerLazer::setPlayerLazerPositX(int playerPositXWhenFiring) {playerLazerPositX = playerPositXWhenFiring+10;}
+void PlayerLazer::setPlayerLazerPositX(int playerPositXWhenFiring) {playerLazerPositX = playerPositXWhenFiring+5;}
 void PlayerLazer::move() {playerLazerPositY -= playerLazerVelocY;}
-void PlayerLazer::handleEvent(SDL_Event& e) {
-	if(e.type = SDL_KEYDOWN && e.key.repeat == 0) {
-		switch(e.key.keysym.sym) {
+void PlayerLazer::handleEvent(SDL_Event& event) {
+	if(event.type = SDL_KEYDOWN && event.key.repeat == 0) {
+		switch(event.key.keysym.sym) {
 			case SDLK_UP:
 				playerLazerVelocY += 2;	
 				break;
 		}
 	}
+}
+int PlayerLazer::getFired() {
+	return this->fired;
+}
+void PlayerLazer::setFired(int x) {
+	this->fired = x;
 }
 void PlayerLazer::render() {playerLazerTexture.render(playerLazerPositX, playerLazerPositY);}
 
@@ -160,8 +168,8 @@ void close() {
 	SDL_DestroyWindow(window);
 	window = NULL;
 	renderer = NULL;
-	IMG_Quit();//quit SDL_Image and SDL (subfunctions)
-	SDL_Quit();
+	IMG_Quit();//quit SDL_Image
+	SDL_Quit();//quit SDL
 }
 int main(int argc, char* args[]) {
 	init();
@@ -177,14 +185,20 @@ int main(int argc, char* args[]) {
 		alienArray[i].setAlienPosit(i);
 	}
 	int scrollingOffset = 0;
+	int fired = 0;
 	while(!quit) {
 		while(SDL_PollEvent(&event) != 0) {//remove an event from the event queue and process it
 			if(event.type == SDL_QUIT) {//exit requested by user
 				quit = true;
 			}
 			playerInstance.handleEvent(event);
-			playerLazerInstance.handleEvent(event);
-			playerLazerInstance.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+			std::cout << "Fired is set to " << playerLazerInstance.getFired() << std::endl;
+			if (playerLazerInstance.getFired() == 0 && event.key.keysym.sym == SDLK_UP) {//&& SDL_KEY_UP_PRESSED
+				playerLazerInstance.handleEvent(event);
+				playerLazerInstance.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance.setFired(1);
+				std::cout << "Fired int is set to... " << playerLazerInstance.getFired() << std::endl;
+			}
 		}
 		playerInstance.move();
 		playerLazerInstance.move();
@@ -203,7 +217,7 @@ int main(int argc, char* args[]) {
 			alienArray[i].render();
 		}
 		SDL_RenderPresent(renderer);//refresh renderer
-	}
+	}	
 	close();//free all textures and exit
 	return 0;
 }
