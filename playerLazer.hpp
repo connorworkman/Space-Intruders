@@ -14,8 +14,9 @@ class PlayerLazer {
 		void setFired(int x);
 		int getFired();
 		void handleEvent(SDL_Event& e);
-		void move();
+		bool move();
 		void render();
+		void reset();
 	private:
 		int fired;
 		int playerLazerPositX;

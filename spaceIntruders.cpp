@@ -123,7 +123,14 @@ PlayerLazer::PlayerLazer() {
 	playerLazerVelocY = 0;
 }
 void PlayerLazer::setPlayerLazerPositX(int playerPositXWhenFiring) {playerLazerPositX = playerPositXWhenFiring+5;}
-void PlayerLazer::move() {playerLazerPositY -= playerLazerVelocY;}
+bool PlayerLazer::move() {
+	playerLazerPositY -= playerLazerVelocY;
+	if (playerLazerPositY < 0) {//if lazer goes off screen
+		std::cout << "object is now off screen" << std::endl;
+		return false;
+	}
+	return true;
+}
 void PlayerLazer::handleEvent(SDL_Event& event) {
 	if(event.type = SDL_KEYDOWN && event.key.repeat == 0) {
 		switch(event.key.keysym.sym) {
@@ -138,6 +145,12 @@ int PlayerLazer::getFired() {
 }
 void PlayerLazer::setFired(int x) {
 	this->fired = x;
+}
+void PlayerLazer::reset() {
+	this->fired = 0;
+	this->playerLazerPositY = 480;
+	this->playerLazerPositX = 0;
+	this->playerLazerVelocY = 0;
 }
 void PlayerLazer::render() {playerLazerTexture.render(playerLazerPositX, playerLazerPositY);}
 
@@ -192,7 +205,6 @@ int main(int argc, char* args[]) {
 				quit = true;
 			}
 			playerInstance.handleEvent(event);
-			std::cout << "Fired is set to " << playerLazerInstance.getFired() << std::endl;
 			if (playerLazerInstance.getFired() == 0 && event.key.keysym.sym == SDLK_UP) {//&& SDL_KEY_UP_PRESSED
 				playerLazerInstance.handleEvent(event);
 				playerLazerInstance.setPlayerLazerPositX(playerInstance.getPlayerPositX());
@@ -201,7 +213,9 @@ int main(int argc, char* args[]) {
 			}
 		}
 		playerInstance.move();
-		playerLazerInstance.move();
+		if (!playerLazerInstance.move()) {
+			playerLazerInstance.reset();
+		}
 		--scrollingOffset;
 		if(scrollingOffset < -backgroundTexture.getWidth()) {
 			scrollingOffset = 0;
