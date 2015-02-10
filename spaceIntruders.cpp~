@@ -6,57 +6,16 @@
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string>
-//#include "imageTexture.hpp"--place these class declarations in seperate header files for readability
-//#include "player.hpp"----------"	"	"	"	"	"	"	"	"
-//#include "alien.hpp"-----------"	"	"	"	"	"	"	"	"
+#include <iostream>
+#include "imageTexture.hpp"
+#include "player.hpp"
+#include "alien.hpp"
+#include "playerLazer.hpp"
+
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
-
-class Player {
-	public:
-		static const int PLAYER_WIDTH = 20;
-		static const int PLAYER_HEIGHT = 20;
-		static const int PLAYER_VEL = 5;
-		Player();
-		void handleEvent(SDL_Event& e);
-		void move();
-		int getPlayerHorizontalPosit();
-		void render();
-	private:
-		int playerHorizontalPosit;
-		int playerVerticalPosit;
-		int playerHorizontalVelocity;
-};
-
-class Alien {
-	public:
-		static const int ALIEN_WIDTH = 30;
-		static const int ALIEN_HEIGHT = 30;
-		Alien();
-		void setAlienPosit(int alienNumber);
-		//void handleEvent(SDL_Event& e);//TODO implement explosion/destruction event when hit by playerLazer
-		void render();
-	private:
-		int alienHorizontalPosit;
-		int alienVerticalPosit;
-};
-
-class PlayerLazer {
-	public:
-		static const int LAZER_WIDTH = 5;
-		static const int LAZER_HEIGHT = 5;
-		PlayerLazer();//set player lazer defaults
-		void setPlayerLazerPosit(int playerLocationWhenFiring);
-		void handleEvent(SDL_Event& e);
-		void playerLazerMove();
-		void render();
-	private:
-		int playerLazerHorizontalPosit;
-		int playerLazerVerticalPosit;
-		int playerLazerVerticalVelocity;
-};
 //TODO create additional alien class with ability to fire back?
 //TODO create enemy lazer class
 
@@ -73,15 +32,12 @@ ImageTexture backgroundTexture;
 ImageTexture alienTexture;
 ImageTexture playerLazerTexture;
 //TODO add explosion textures, enemy lazer textures, additional enemy textures
-
 ImageTexture::ImageTexture() {
 	sdlTexture = NULL;
 	sdlTextureWidth = 0;
 	sdlTextureHeight = 0;
 }
-
 ImageTexture::~ImageTexture() {free();}
-
 bool ImageTexture::loadFromFile(std::string path) {
 	free();//free previous load before attempting new load
 	SDL_Texture* newTexture = NULL;
@@ -103,61 +59,58 @@ void ImageTexture::free() {
 		sdlTextureHeight = 0;
 	}
 }
-
 void ImageTexture::setColorMode(Uint8 red, Uint8 green, Uint8 blue) {SDL_SetTextureColorMod(sdlTexture, red, green, blue);}
-
 void ImageTexture::setBlendMode(SDL_BlendMode blending) {SDL_SetTextureBlendMode(sdlTexture, blending);}
-
 void ImageTexture::setAlphaMode(Uint8 alpha){SDL_SetTextureAlphaMod(sdlTexture, alpha);}
-
 void ImageTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
-	SDL_Rect renderRect = { x, y, sdlTextureWidth, sdlTextureHeight };
+	SDL_Rect renderRect = {x, y, sdlTextureWidth, sdlTextureHeight};
 	SDL_RenderCopyEx(renderer, sdlTexture, clip, &renderRect, angle, center, flip);
 }
-
 int ImageTexture::getWidth() {return sdlTextureWidth;}
 int ImageTexture::getHeight() {return sdlTextureHeight;}
 
 Player::Player() {
-    playerHorizontalPosit = SCREEN_WIDTH/2;
-    playerVerticalPosit = SCREEN_HEIGHT-20;
-    playerHorizontalVelocity = 0;
+    playerPositX = SCREEN_WIDTH/2;
+    playerPositY = SCREEN_HEIGHT-20;
+    playerVelocX = 0;
 }
-
-void Player::handleEvent( SDL_Event& e ) {
-	if(e.type == SDL_KEYDOWN && e.key.repeat == 0) {//keypress occurrs
-        	switch( e.key.keysym.sym ) {
+void Player::handleEvent( SDL_Event& event ) {
+	if(event.type == SDL_KEYDOWN && event.key.repeat == 0) {//keypress occurrs
+        	switch( event.key.keysym.sym ) {
 			case SDLK_LEFT:
-				playerHorizontalVelocity -= PLAYER_VEL;
+				playerVelocX -= PLAYER_VEL;
 				break;
 			case SDLK_RIGHT:
-				playerHorizontalVelocity += PLAYER_VEL;
+				playerVelocX += PLAYER_VEL;
 				break;
     		}
 	}
-	else if(e.type == SDL_KEYUP && e.key.repeat == 0) {//keypress is released
-		switch(e.key.keysym.sym) {
+	else if(event.type == SDL_KEYUP && event.key.repeat == 0) {//keypress is released
+		switch(event.key.keysym.sym) {
 			case SDLK_LEFT:
-				playerHorizontalVelocity += PLAYER_VEL;
+				playerVelocX += PLAYER_VEL;
 				break;
 			case SDLK_RIGHT:
-				playerHorizontalVelocity -= PLAYER_VEL;
+				playerVelocX -= PLAYER_VEL;
 				break;
         	}
     	}
 }
-
 void Player::move() {
-    playerHorizontalPosit += playerHorizontalVelocity;
-    //keep the player on the screen by correcting by playerHorizontalVelocity
-    if((playerHorizontalPosit < 0) || (playerHorizontalPosit + PLAYER_WIDTH > SCREEN_WIDTH)) {
-        playerHorizontalPosit -= playerHorizontalVelocity;
+    playerPositX += playerVelocX;
+    //keep the player on the screen by correcting by playerVelocX
+    if((playerPositX < 0) || (playerPositX + PLAYER_WIDTH > SCREEN_WIDTH)) {
+        playerPositX -= playerVelocX;
     }
 }
 
-int Player::getPlayerHorizontalPosit() {return playerHorizontalPosit;}
+int Player::getPlayerPositX() {
+	return playerPositX;
+}
 
-void Player::render() {playerTexture.render(playerHorizontalPosit, playerVerticalPosit);}
+void Player::render() {
+	playerTexture.render(playerPositX, playerPositY);
+}
 
 Alien::Alien() {
 	alienHorizontalPosit = 0;
@@ -169,29 +122,56 @@ void Alien::setAlienPosit(int alienNumber) {
 	alienVerticalPosit = ((alienNumber%10)+1)*30;
 }
 
-void Alien::render() {alienTexture.render(alienHorizontalPosit, alienVerticalPosit);}
+void Alien::render() {
+	alienTexture.render(alienHorizontalPosit, alienVerticalPosit);
+}
 
 PlayerLazer::PlayerLazer() {
-	playerLazerHorizontalPosit = 0;
-	playerLazerVerticalPosit = 480;
-	playerLazerVerticalVelocity = 0;
+	this->fired = false;
+	this->playerLazerPositX = 0;
+	this->playerLazerPositY = 480;
+	this->playerLazerVelocY = 0;
 }
 
-void PlayerLazer::setPlayerLazerPosit(int playerHorizontalPositWhenFiring) {playerLazerHorizontalPosit = playerHorizontalPositWhenFiring+10;}
+PlayerLazer::~PlayerLazer() {
+	//empty destructor for PlayerLazer
+}
 
-void PlayerLazer::playerLazerMove() {playerLazerVerticalPosit -= playerLazerVerticalVelocity;}
+void PlayerLazer::setPlayerLazerPositX(int playerPositXWhenFiring) {
+	this->playerLazerPositX = playerPositXWhenFiring+5;
+}
 
-void PlayerLazer::handleEvent(SDL_Event& e) {
-	if(e.type = SDL_KEYDOWN && e.key.repeat == 0) {
-		switch(e.key.keysym.sym) {
-			case SDLK_UP:
-				playerLazerVerticalVelocity += 2;	
-				break;
-		}
+bool PlayerLazer::move() {
+	playerLazerPositY -= playerLazerVelocY;
+	if (playerLazerPositY < 0) {//if lazer goes off screen
+		std::cout << "lazer has traveled off-screen" << std::endl;
+		return false;
 	}
+	return true;
 }
 
-void PlayerLazer::render() {playerLazerTexture.render(playerLazerHorizontalPosit, playerLazerVerticalPosit);}
+bool PlayerLazer::getFired() {
+	return this->fired;
+}
+
+void PlayerLazer::setFired(bool x) {
+	this->fired = x;
+}
+
+void PlayerLazer::setVelocY(int newVelocity) {
+	this->playerLazerVelocY = newVelocity;
+}
+
+void PlayerLazer::reset() {
+	this->fired = false;
+	this->playerLazerPositY = 480;
+	this->playerLazerPositX = 0;
+	this->playerLazerVelocY = 0;
+}
+
+void PlayerLazer::render() {
+	playerLazerTexture.render(playerLazerPositX, playerLazerPositY);
+}
 
 void init() {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -222,8 +202,8 @@ void close() {
 	SDL_DestroyWindow(window);
 	window = NULL;
 	renderer = NULL;
-	IMG_Quit();//quit SDL_Image and SDL (subfunctions)
-	SDL_Quit();
+	IMG_Quit();//quit SDL_Image
+	SDL_Quit();//quit SDL
 }
 
 int main(int argc, char* args[]) {
@@ -233,6 +213,15 @@ int main(int argc, char* args[]) {
 	SDL_Event event;
 	Player playerInstance;
 	PlayerLazer playerLazerInstance;
+	PlayerLazer playerLazerInstance2;
+	PlayerLazer playerLazerInstance3;
+	PlayerLazer playerLazerInstance4;
+	PlayerLazer playerLazerInstance5;
+	PlayerLazer playerLazerInstance6;
+	PlayerLazer playerLazerInstance7;
+	PlayerLazer playerLazerInstance8;
+	PlayerLazer playerLazerInstance9;
+	PlayerLazer playerLazerInstance10;
 	int i = 0;
 	int alienCount = 100;
 	Alien alienArray[alienCount];
@@ -246,11 +235,118 @@ int main(int argc, char* args[]) {
 				quit = true;
 			}
 			playerInstance.handleEvent(event);
-			playerLazerInstance.handleEvent(event);
-			playerLazerInstance.setPlayerLazerPosit(playerInstance.getPlayerHorizontalPosit());
+			if (event.type == SDL_KEYUP &&
+			event.key.repeat == 0 && 
+			playerLazerInstance.getFired() == false && 
+			event.key.keysym.sym == SDLK_UP) {//&& SDL_KEY_UP_PRESSED
+				playerLazerInstance.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance.setFired(true);
+				playerLazerInstance.setVelocY(7);
+			}
+			else if (event.type == SDL_KEYUP && 
+			event.key.repeat == 0 && 
+			playerLazerInstance2.getFired() == false && 
+			event.key.keysym.sym == SDLK_UP) {
+				playerLazerInstance2.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance2.setFired(true);
+				playerLazerInstance2.setVelocY(7);
+			}
+			else if (event.type == SDL_KEYUP &&
+			event.key.repeat == 0 &&
+			playerLazerInstance3.getFired() == false &&
+			event.key.keysym.sym == SDLK_UP) {
+				playerLazerInstance3.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance3.setFired(true);
+				playerLazerInstance3.setVelocY(7);
+			}
+			else if (event.type == SDL_KEYUP &&
+			event.key.repeat == 0 &&
+			playerLazerInstance4.getFired() == false &&
+			event.key.keysym.sym == SDLK_UP) {
+				playerLazerInstance4.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance4.setFired(true);
+				playerLazerInstance4.setVelocY(7);
+			}
+			else if (event.type == SDL_KEYUP &&
+			event.key.repeat == 0 &&
+			playerLazerInstance5.getFired() == false &&
+			event.key.keysym.sym == SDLK_UP) {
+				playerLazerInstance5.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance5.setFired(true);
+				playerLazerInstance5.setVelocY(7);
+			}
+			else if (event.type == SDL_KEYUP &&
+			event.key.repeat == 0 &&
+			playerLazerInstance6.getFired() == false &&
+			event.key.keysym.sym == SDLK_UP) {
+				playerLazerInstance6.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance6.setFired(true);
+				playerLazerInstance6.setVelocY(7);
+			}
+			else if (event.type == SDL_KEYUP &&
+			event.key.repeat == 0 &&
+			playerLazerInstance7.getFired() == false &&
+			event.key.keysym.sym == SDLK_UP) {
+				playerLazerInstance7.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance7.setFired(true);
+				playerLazerInstance7.setVelocY(7);
+			}
+			else if (event.type == SDL_KEYUP &&
+			event.key.repeat == 0 &&
+			playerLazerInstance8.getFired() == false &&
+			event.key.keysym.sym == SDLK_UP) {
+				playerLazerInstance8.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance8.setFired(true);
+				playerLazerInstance8.setVelocY(7);
+			}
+			else if (event.type == SDL_KEYUP &&
+			event.key.repeat == 0 &&
+			playerLazerInstance9.getFired() == false &&
+			event.key.keysym.sym == SDLK_UP) {
+				playerLazerInstance9.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance9.setFired(true);
+				playerLazerInstance9.setVelocY(7);
+			}
+			else if (event.type == SDL_KEYUP &&
+			event.key.repeat == 0 &&
+			playerLazerInstance10.getFired() == false &&
+			event.key.keysym.sym == SDLK_UP) {
+				playerLazerInstance10.setPlayerLazerPositX(playerInstance.getPlayerPositX());
+				playerLazerInstance10.setFired(true);
+				playerLazerInstance10.setVelocY(7);
+			}
 		}
 		playerInstance.move();
-		playerLazerInstance.playerLazerMove();
+		if (!playerLazerInstance.move()) {
+			playerLazerInstance.reset();
+		}
+		if (!playerLazerInstance2.move()) {
+			playerLazerInstance2.reset();
+		}
+		if (!playerLazerInstance3.move()) {
+			playerLazerInstance3.reset();
+		}
+		if (!playerLazerInstance4.move()) {
+			playerLazerInstance4.reset();
+		}
+		if (!playerLazerInstance5.move()) {
+			playerLazerInstance5.reset();
+		}
+		if (!playerLazerInstance6.move()) {
+			playerLazerInstance6.reset();
+		}
+		if (!playerLazerInstance7.move()) {
+			playerLazerInstance7.reset();
+		}
+		if (!playerLazerInstance8.move()) {
+			playerLazerInstance8.reset();
+		}
+		if (!playerLazerInstance9.move()) {
+			playerLazerInstance9.reset();
+		}
+		if (!playerLazerInstance10.move()) {
+			playerLazerInstance10.reset();
+		}
 		--scrollingOffset;
 		if(scrollingOffset < -backgroundTexture.getWidth()) {
 			scrollingOffset = 0;
@@ -261,12 +357,21 @@ int main(int argc, char* args[]) {
 		backgroundTexture.render(scrollingOffset + backgroundTexture.getWidth(), 0);
 		playerInstance.render();
 		playerLazerInstance.render();
+		playerLazerInstance2.render();
+		playerLazerInstance3.render();
+		playerLazerInstance4.render();
+		playerLazerInstance5.render();
+		playerLazerInstance6.render();
+		playerLazerInstance7.render();
+		playerLazerInstance8.render();
+		playerLazerInstance9.render();
+		playerLazerInstance10.render();
 		int i = 0;
 		for (i = 0; i < alienCount; i++) {
 			alienArray[i].render();
 		}
 		SDL_RenderPresent(renderer);//refresh renderer
-	}
+	}	
 	close();//free all textures and exit
 	return 0;
 }

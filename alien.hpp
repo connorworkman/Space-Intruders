@@ -15,8 +15,10 @@ class Alien {
 		static const int ALIEN_HEIGHT = 30;
 		Alien();
 		void setAlienPosit(int alienNumber);
+		int getAlienHorizontalPosit();
+		int getAlienVerticalPosit();
 		//void handleEvent(SDL_Event& e);//TODO implement explosion/destruction event when hit by playerLazer
-		void render();
+		void render(int x, int y, SDL_Rect* clip);
 	private:
 		int alienHorizontalPosit;
 		int alienVerticalPosit;
