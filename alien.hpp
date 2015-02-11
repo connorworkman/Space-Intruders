@@ -19,6 +19,7 @@ class Alien {
 		void setY(int y);
 		int getAlienHorizontalPosit();
 		int getAlienVerticalPosit();
+		void drop();
 		void explode();
 		void hide();
 		void move(int m);

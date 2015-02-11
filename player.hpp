@@ -20,6 +20,7 @@ class Player {
 		void handleEvent(SDL_Event& e);
 		void move();
 		int getPlayerPositX();
+		int getPlayerPositY();
 		void render();
 	private:
 		int playerPositX;

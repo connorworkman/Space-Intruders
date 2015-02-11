@@ -133,7 +133,7 @@ void Player::move() {
 }
 
 int Player::getPlayerPositX() {return playerPositX;}//player X position getter
-
+int Player::getPlayerPositY() {return playerPositY;}//player Y position getter
 void Player::render() {playerTexture.render(playerPositX, playerPositY);}//player renderer, TODO add clip argument when player is animated
 
 Alien::Alien() {
@@ -163,8 +163,12 @@ void Alien::move(int m) {
 	}
 }
 
-void Alien::hide() {
-	this->setX(-30);
+void Alien::drop() {
+	this->alienVerticalPosit += 3;
+}
+
+void Alien::hide() {//TODO increase alien killcount for each hidden alien instance
+	this->setX(-50);
 	this->setY(-30);
 }
 
@@ -251,6 +255,16 @@ bool checkCollide(int aX, int aY, int bX, int bY) {//we probably also need to ac
 	else {return false;}
 }
 
+bool checkCollidePlayer(int aX, int aY, int bX, int bY) {
+	if (aX <= bX + 20 &&
+	aX + 20 >= bX &&
+	aY >= bY - 14 &&
+	aY - 20 <= bY) {
+		return true;
+	}
+	else {return false;}
+}
+
 int main(int argc, char* args[]) {
 	init();
 	loadMedia();
@@ -298,11 +312,16 @@ int main(int argc, char* args[]) {
 				//CHECK FOR LAZER-to-ALIEN COLLISION
 				if (checkCollide(playerLazerInstance[i].getPositX(), playerLazerInstance[i].getPositY(),
 				alienArray[j].getAlienHorizontalPosit(), alienArray[j].getAlienVerticalPosit())) {
-					std::cout << "OBJECTS HAVE COLLIDED" << std::endl;
 					playerLazerInstance[i].reset();
 					//alienArray[j].explode();
 					alienArray[j].hide();
 				}
+			if (checkCollidePlayer(playerInstance.getPlayerPositX(), playerInstance.getPlayerPositY(),
+			alienArray[j].getAlienHorizontalPosit(), alienArray[j].getAlienVerticalPosit())) {
+				std::cout << "Player is dead." << std::endl;
+				close();
+			
+			}
 			}
 		}
 		playerInstance.move();		
@@ -328,6 +347,9 @@ int main(int argc, char* args[]) {
 		if (frame/10 >= ALIEN_ANIMATION_FRAMES) {
 			frame = 0;
 			lastFired = 0;//prototype wait function for lazer TODO add seperate frame counter for firing rate
+			for (i=0; i < alienCount; i++) {
+				alienArray[i].drop();
+			}
 		}
 		for (i = 0; i < lazerCount; i++) {
 			if (playerLazerInstance[i].getFired() == true) {
