@@ -31,11 +31,11 @@ ImageTexture playerTexture;
 ImageTexture backgroundTexture;
 ImageTexture alienTexture;
 ImageTexture playerLazerTexture;
-////////////////////////////////////////////////////////
+
 ImageTexture alienAnimationTexture;
 SDL_Rect alienAnimationClips[ALIEN_ANIMATION_FRAMES];
-///////////////////////////////////////////////////////
-//TODO add explosion textures, enemy lazer textures, additional enemy textures
+
+//TODO add explosion textures, enemy lazer textures?, additional different enemy textures (perhaps a seperate class for aliens that fire back)
 ImageTexture::ImageTexture() {
 	sdlTexture = NULL;
 	sdlTextureWidth = 0;
@@ -68,6 +68,7 @@ bool ImageTexture::loadFromFile(std::string path) {
 	alienAnimationClips[3].y = 0;
 	alienAnimationClips[3].w = 20;
 	alienAnimationClips[3].h = 14;
+	//TODO playerAnimationClips[0].x  = 0;
 	return sdlTexture != NULL;
 }
 void ImageTexture::free() {
@@ -120,6 +121,7 @@ void Player::handleEvent( SDL_Event& event ) {
         	}
     	}
 }
+
 void Player::move() {
     playerPositX += playerVelocX;
     //keep the player on the screen by correcting by playerVelocX
@@ -142,13 +144,20 @@ Alien::Alien() {
 }
 
 void Alien::setAlienPosit(int alienNumber) {
-	alienHorizontalPosit = (((alienNumber/10))*30) + (SCREEN_WIDTH)/4;
+	alienHorizontalPosit = (((alienNumber/10))*30) + (SCREEN_WIDTH)/4 + 20;
 	alienVerticalPosit = ((alienNumber%10)+1)*30;
 }
 int Alien::getAlienHorizontalPosit() {return this->alienHorizontalPosit;}
 int Alien::getAlienVerticalPosit() {return this->alienVerticalPosit;}
 void Alien::render(int w, int h, SDL_Rect* clip) {
 	alienAnimationTexture.render(w, h, clip);
+}
+void Alien::move(int m) {
+	if (m<5) {
+		this->alienHorizontalPosit -= 1;
+	} else if (m>=5) {
+		this->alienHorizontalPosit += 1;
+	}
 }
 
 PlayerLazer::PlayerLazer() {
@@ -238,7 +247,11 @@ int main(int argc, char* args[]) {
 	bool quit = false;
 	SDL_Event event;
 	Player playerInstance;
-	PlayerLazer playerLazerInstance;
+////////////////////////////////////////////////////playerlazer array here
+	int lazerCount = 10;
+	PlayerLazer playerLazerInstance[lazerCount];
+/////////////////////////////////////////////////////////////////////////
+/*	PlayerLazer playerLazerInstance;
 	PlayerLazer playerLazerInstance2;
 	PlayerLazer playerLazerInstance3;
 	PlayerLazer playerLazerInstance4;
@@ -248,7 +261,7 @@ int main(int argc, char* args[]) {
 	PlayerLazer playerLazerInstance8;
 	PlayerLazer playerLazerInstance9;
 	PlayerLazer playerLazerInstance10;
-	int i = 0;
+*/	int i = 0;
 	int alienCount = 100;
 	Alien alienArray[alienCount];
 	for (i = 0; i < alienCount; i++) {
@@ -256,124 +269,35 @@ int main(int argc, char* args[]) {
 	}
 	int scrollingOffset = 0;
 	int frame = 0;
+	int m = 0;
 	while(!quit) {//MAIN GAME LOOP
 		while(SDL_PollEvent(&event) != 0) {//remove an event from the event queue and process it
 			if(event.type == SDL_QUIT) {//exit requested by user
 				quit = true;
 			}
-			playerInstance.handleEvent(event);
-			if (event.type == SDL_KEYUP &&
-			event.key.repeat == 0 && 
-			playerLazerInstance.getFired() == false && 
-			event.key.keysym.sym == SDLK_UP) {//&& SDL_KEY_UP_PRESSED
-				playerLazerInstance.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance.setFired(true);
-				playerLazerInstance.setVelocY(7);
-			}
-			else if (event.type == SDL_KEYUP && 
-			event.key.repeat == 0 && 
-			playerLazerInstance2.getFired() == false && 
-			event.key.keysym.sym == SDLK_UP) {
-				playerLazerInstance2.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance2.setFired(true);
-				playerLazerInstance2.setVelocY(7);
-			}
-			else if (event.type == SDL_KEYUP &&
-			event.key.repeat == 0 &&
-			playerLazerInstance3.getFired() == false &&
-			event.key.keysym.sym == SDLK_UP) {
-				playerLazerInstance3.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance3.setFired(true);
-				playerLazerInstance3.setVelocY(7);
-			}
-			else if (event.type == SDL_KEYUP &&
-			event.key.repeat == 0 &&
-			playerLazerInstance4.getFired() == false &&
-			event.key.keysym.sym == SDLK_UP) {
-				playerLazerInstance4.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance4.setFired(true);
-				playerLazerInstance4.setVelocY(7);
-			}
-			else if (event.type == SDL_KEYUP &&
-			event.key.repeat == 0 &&
-			playerLazerInstance5.getFired() == false &&
-			event.key.keysym.sym == SDLK_UP) {
-				playerLazerInstance5.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance5.setFired(true);
-				playerLazerInstance5.setVelocY(7);
-			}
-			else if (event.type == SDL_KEYUP &&
-			event.key.repeat == 0 &&
-			playerLazerInstance6.getFired() == false &&
-			event.key.keysym.sym == SDLK_UP) {
-				playerLazerInstance6.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance6.setFired(true);
-				playerLazerInstance6.setVelocY(7);
-			}
-			else if (event.type == SDL_KEYUP &&
-			event.key.repeat == 0 &&
-			playerLazerInstance7.getFired() == false &&
-			event.key.keysym.sym == SDLK_UP) {
-				playerLazerInstance7.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance7.setFired(true);
-				playerLazerInstance7.setVelocY(7);
-			}
-			else if (event.type == SDL_KEYUP &&
-			event.key.repeat == 0 &&
-			playerLazerInstance8.getFired() == false &&
-			event.key.keysym.sym == SDLK_UP) {
-				playerLazerInstance8.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance8.setFired(true);
-				playerLazerInstance8.setVelocY(7);
-			}
-			else if (event.type == SDL_KEYUP &&
-			event.key.repeat == 0 &&
-			playerLazerInstance9.getFired() == false &&
-			event.key.keysym.sym == SDLK_UP) {
-				playerLazerInstance9.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance9.setFired(true);
-				playerLazerInstance9.setVelocY(7);
-			}
-			else if (event.type == SDL_KEYUP &&
-			event.key.repeat == 0 &&
-			playerLazerInstance10.getFired() == false &&
-			event.key.keysym.sym == SDLK_UP) {
-				playerLazerInstance10.setPlayerLazerPositX(playerInstance.getPlayerPositX());
-				playerLazerInstance10.setFired(true);
-				playerLazerInstance10.setVelocY(7);
+			playerInstance.handleEvent(event);//player space ship events handled in player function
+			if (event.type == SDL_KEYUP && event.key.repeat == 0 && event.key.keysym.sym == SDLK_UP) {//on release of up arrow: fire a lazer
+				int i = 0;
+				//TODO place a lower bound on the time between firing lazers (something related to frame #)
+				for (i=0; i<lazerCount; i++) {
+					if (playerLazerInstance[i].getFired() == false) {
+						playerLazerInstance[i].setPlayerLazerPositX(playerInstance.getPlayerPositX());
+						playerLazerInstance[i].setFired(true);
+						playerLazerInstance[i].setVelocY(5);
+						i = lazerCount;
+					}
+				}
 			}
 		}
-		playerInstance.move();
-		if (!playerLazerInstance.move()) {
-			playerLazerInstance.reset();
+		for (i=0; i < lazerCount; i++) {
+			if (!playerLazerInstance[i].move()) {playerLazerInstance[i].reset();}
 		}
-		if (!playerLazerInstance2.move()) {
-			playerLazerInstance2.reset();
+		playerInstance.move();		
+		for (i = 0; i < alienCount; i++) {
+			alienArray[i].move(m/4);
 		}
-		if (!playerLazerInstance3.move()) {
-			playerLazerInstance3.reset();
-		}
-		if (!playerLazerInstance4.move()) {
-			playerLazerInstance4.reset();
-		}
-		if (!playerLazerInstance5.move()) {
-			playerLazerInstance5.reset();
-		}
-		if (!playerLazerInstance6.move()) {
-			playerLazerInstance6.reset();
-		}
-		if (!playerLazerInstance7.move()) {
-			playerLazerInstance7.reset();
-		}
-		if (!playerLazerInstance8.move()) {
-			playerLazerInstance8.reset();
-		}
-		if (!playerLazerInstance9.move()) {
-			playerLazerInstance9.reset();
-		}
-		if (!playerLazerInstance10.move()) {
-			playerLazerInstance10.reset();
-		}
+		m++;
+		if (m >= 40) {m=0;}
 		--scrollingOffset;
 		if(scrollingOffset < -backgroundTexture.getWidth()) {
 			scrollingOffset = 0;
@@ -383,9 +307,9 @@ int main(int argc, char* args[]) {
 		backgroundTexture.render(scrollingOffset, 0);
 		backgroundTexture.render(scrollingOffset + backgroundTexture.getWidth(), 0);
 		playerInstance.render();
-///////////////////////////////////////////////////
+
 		SDL_Rect* currentClip = &alienAnimationClips[frame/10];
-		int i = 0;
+		
 		for (i = 0; i < alienCount; i++) {
 			alienArray[i].render((alienArray[i].getAlienHorizontalPosit()), (alienArray[i].getAlienVerticalPosit()), currentClip);
 		}
@@ -393,21 +317,11 @@ int main(int argc, char* args[]) {
 		if (frame/10 >= ALIEN_ANIMATION_FRAMES) {
 			frame = 0;
 		}
-///////////////////////////////////////////////////
-		playerLazerInstance.render();
-		playerLazerInstance2.render();
-		playerLazerInstance3.render();
-		playerLazerInstance4.render();
-		playerLazerInstance5.render();
-		playerLazerInstance6.render();
-		playerLazerInstance7.render();
-		playerLazerInstance8.render();
-		playerLazerInstance9.render();
-		playerLazerInstance10.render();
-		//int i = 0;
-		//for (i = 0; i < alienCount; i++) {
-		//	alienArray[i].render();
-		//}
+		for (i = 0; i < lazerCount; i++) {
+			if (playerLazerInstance[i].getFired() == true) {
+				playerLazerInstance[i].render();
+			}
+		}
 		SDL_RenderPresent(renderer);//refresh renderer
 	}
 	close();//free all textures and exit

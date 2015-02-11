@@ -17,6 +17,7 @@ class Alien {
 		void setAlienPosit(int alienNumber);
 		int getAlienHorizontalPosit();
 		int getAlienVerticalPosit();
+		void move(int m);
 		//void handleEvent(SDL_Event& e);//TODO implement explosion/destruction event when hit by playerLazer
 		void render(int x, int y, SDL_Rect* clip);
 	private:
