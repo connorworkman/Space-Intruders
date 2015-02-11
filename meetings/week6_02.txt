@@ -1,0 +1,22 @@
+02.10.2015
+Today I reduced the code repitition problem from the player lazer implementation (from 100 lines to about 15).
+I also changed the static alien textures to animated sprite clips,
+and added collision detection between the player lazers and alien invaders.
+Still need to add explosions and remove alien instances upon collision.
+I seem to be getting the hang of things here.
+It might be necessary to change from arrays to vectors, 
+but I'll deal with that when it becomes a problem.
+There were many commits to my public github repository today,
+but this is my first update to the bitbucket repo today.
+TODO's: Animate player space craft in the same way I created the animated alien texture.
+	Add additional enemy types.
+	Destroy alien instances upon collision with player lazer.
+	Create explosion texture which appears briefly before dissappearing, occuring after a collision between player lazer and alien.
+	Allow enemies to fire back.
+	Allow enemies to increase horizontal movement speed, and drop down towards the player.
+	Allow enemies to collide with player space craft once they reach the bottom 'row'.
+	Redraw player space craft image texture.
+	Redraw player lazer image texture.
+	Create an alien lazer image texture.
+	Think about adding score counter, game menus, additional levels/difficulties.
+	The list goes on.......
