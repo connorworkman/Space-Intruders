@@ -1,7 +1,6 @@
 /*	Space Intruders		*/
 /*    Author: Connor Workman	*/
 
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
@@ -24,15 +23,16 @@ void loadMedia();
 void close();
 
 SDL_Window* window = NULL;
+
 SDL_Renderer* renderer = NULL;
 
 //instantiate all available textures
 ImageTexture playerTexture;
 ImageTexture backgroundTexture;
-ImageTexture alienTexture;
+//ImageTexture alienTexture;//this one is no longer in use
 ImageTexture playerLazerTexture;
-
 ImageTexture alienAnimationTexture;
+
 SDL_Rect alienAnimationClips[ALIEN_ANIMATION_FRAMES];
 
 //TODO add explosion textures, enemy lazer textures?, additional different enemy textures (perhaps a seperate class for aliens that fire back)
@@ -41,7 +41,9 @@ ImageTexture::ImageTexture() {
 	sdlTextureWidth = 0;
 	sdlTextureHeight = 0;
 }
+
 ImageTexture::~ImageTexture() {free();}
+
 bool ImageTexture::loadFromFile(std::string path) {
 	free();//free previous load before attempting new load
 	SDL_Texture* newTexture = NULL;
@@ -63,6 +65,7 @@ bool ImageTexture::loadFromFile(std::string path) {
 
 	return sdlTexture != NULL;
 }
+
 void ImageTexture::free() {
 	if(sdlTexture != NULL) {
 		//destroy texture and return all values back to defaults
@@ -72,9 +75,13 @@ void ImageTexture::free() {
 		sdlTextureHeight = 0;
 	}
 }
+
 void ImageTexture::setColorMode(Uint8 red, Uint8 green, Uint8 blue) {SDL_SetTextureColorMod(sdlTexture, red, green, blue);}
+
 void ImageTexture::setBlendMode(SDL_BlendMode blending) {SDL_SetTextureBlendMode(sdlTexture, blending);}
+
 void ImageTexture::setAlphaMode(Uint8 alpha){SDL_SetTextureAlphaMod(sdlTexture, alpha);}
+
 void ImageTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
 	SDL_Rect renderRect = {x, y, sdlTextureWidth, sdlTextureHeight};
 	if (clip!= NULL) {
@@ -83,7 +90,9 @@ void ImageTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point*
 	}
 	SDL_RenderCopyEx(renderer, sdlTexture, clip, &renderRect, angle, center, flip);
 }
+
 int ImageTexture::getWidth() {return sdlTextureWidth;}
+
 int ImageTexture::getHeight() {return sdlTextureHeight;}
 
 Player::Player() {
@@ -91,6 +100,7 @@ Player::Player() {
     playerPositY = SCREEN_HEIGHT-20;
     playerVelocX = 0;
 }
+
 void Player::handleEvent( SDL_Event& event ) {
 	if(event.type == SDL_KEYDOWN && event.key.repeat == 0) {//keypress occurrs
         	switch( event.key.keysym.sym ) {
@@ -135,11 +145,13 @@ void Alien::setAlienPosit(int alienNumber) {
 	alienHorizontalPosit = (((alienNumber/10))*30) + (SCREEN_WIDTH)/4 + 20;
 	alienVerticalPosit = ((alienNumber%10)+1)*30;
 }
+
 int Alien::getAlienHorizontalPosit() {return this->alienHorizontalPosit;}
+
 int Alien::getAlienVerticalPosit() {return this->alienVerticalPosit;}
-void Alien::render(int w, int h, SDL_Rect* clip) {
-	alienAnimationTexture.render(w, h, clip);
-}
+
+void Alien::render(int w, int h, SDL_Rect* clip) {alienAnimationTexture.render(w, h, clip);}
+
 void Alien::move(int m) {
 	if (m<5) {
 		this->alienHorizontalPosit -= 1;
@@ -158,6 +170,9 @@ PlayerLazer::PlayerLazer() {
 PlayerLazer::~PlayerLazer() {}//empty destructor for PlayerLazer
 
 void PlayerLazer::setPlayerLazerPositX(int playerPositXWhenFiring) {this->playerLazerPositX = playerPositXWhenFiring+5;}//place PlayerLazer x coordinate
+
+int PlayerLazer::getPositX() {return this->playerLazerPositX;}
+int PlayerLazer::getPositY() {return this->playerLazerPositY;}
 
 bool PlayerLazer::move() {
 	playerLazerPositY -= playerLazerVelocY;
@@ -198,7 +213,7 @@ void init() {
 void loadMedia() {
 	playerTexture.loadFromFile("images/player.bmp");
 	backgroundTexture.loadFromFile("images/space.png");
-	alienTexture.loadFromFile("images/alien.bmp");
+	//alienTexture.loadFromFile("images/alien.bmp");
 	playerLazerTexture.loadFromFile("images/playerLazer.bmp");
 	alienAnimationTexture.loadFromFile("images/animatedalien.bmp");
 }
@@ -206,7 +221,7 @@ void loadMedia() {
 void close() {
 	playerTexture.free();
 	backgroundTexture.free();
-	alienTexture.free();
+	//alienTexture.free();
 	alienAnimationTexture.free();
 	playerLazerTexture.free();	
 	SDL_DestroyRenderer(renderer);
@@ -215,6 +230,17 @@ void close() {
 	renderer = NULL;
 	IMG_Quit();//quit SDL_Image
 	SDL_Quit();//quit SDL
+}
+
+bool checkCollide(int aX, int aY, int bX, int bY) {//we probably also need to account for object widths, and heights, so this may take 4 more arguments
+	//logic for checking collision based on coordinates of two objects TODO
+	if (aX <= bX + 20 &&
+	aX + 5 >= bX &&
+	aY >= bY - 14 &&
+	aY - 5 <= bY) {
+		return true;
+	}
+	else {return false;}
 }
 
 int main(int argc, char* args[]) {
@@ -234,6 +260,7 @@ int main(int argc, char* args[]) {
 	int scrollingOffset = 0;
 	int frame = 0;
 	int m = 0;
+	int lastFired = 0;
 	while(!quit) {//MAIN GAME LOOP
 		while(SDL_PollEvent(&event) != 0) {//remove an event from the event queue and process it
 			if(event.type == SDL_QUIT) {//exit requested by user
@@ -242,19 +269,31 @@ int main(int argc, char* args[]) {
 			playerInstance.handleEvent(event);//player space ship events handled in player function
 			if (event.type == SDL_KEYUP && event.key.repeat == 0 && event.key.keysym.sym == SDLK_UP) {//on release of up arrow: fire a lazer
 				int i = 0;
-				//TODO place a lower bound on the time between firing lazers (something related to frame #)
+				//TODO clean up the way we cap the firing rate (right now it is packed in with animated frame rate)
 				for (i=0; i<lazerCount; i++) {
-					if (playerLazerInstance[i].getFired() == false) {
+					if (playerLazerInstance[i].getFired() == false && lastFired != 1) {
 						playerLazerInstance[i].setPlayerLazerPositX(playerInstance.getPlayerPositX());
 						playerLazerInstance[i].setFired(true);
 						playerLazerInstance[i].setVelocY(5);
 						i = lazerCount;
+						lastFired = 1;
 					}
 				}
 			}
 		}
 		for (i=0; i < lazerCount; i++) {
-			if (!playerLazerInstance[i].move()) {playerLazerInstance[i].reset();}
+			if (!playerLazerInstance[i].move()) {
+				playerLazerInstance[i].reset();
+			}
+			int j = 0;
+			for (j = 0; j < alienCount; j++) {
+				//CHECK FOR LAZER-to-ALIEN COLLISION
+				if (checkCollide(playerLazerInstance[i].getPositX(), playerLazerInstance[i].getPositY(),
+				alienArray[j].getAlienHorizontalPosit(), alienArray[j].getAlienVerticalPosit())) {
+					std::cout << "OBJECTS HAVE COLLIDED" << std::endl;
+					playerLazerInstance[i].reset();
+				}
+			}
 		}
 		playerInstance.move();		
 		for (i = 0; i < alienCount; i++) {
@@ -268,21 +307,17 @@ int main(int argc, char* args[]) {
 		}
 		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(renderer);
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////changing to vertical scroll//////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		backgroundTexture.render(0, scrollingOffset);
 		backgroundTexture.render(0, scrollingOffset + backgroundTexture.getHeight());
 		playerInstance.render();
-
 		SDL_Rect* currentClip = &alienAnimationClips[frame/10];
-		
 		for (i = 0; i < alienCount; i++) {
 			alienArray[i].render((alienArray[i].getAlienHorizontalPosit()), (alienArray[i].getAlienVerticalPosit()), currentClip);
 		}
 		++frame;
 		if (frame/10 >= ALIEN_ANIMATION_FRAMES) {
 			frame = 0;
+			lastFired = 0;//prototype wait function for lazer TODO add seperate frame counter for firing rate
 		}
 		for (i = 0; i < lazerCount; i++) {
 			if (playerLazerInstance[i].getFired() == true) {

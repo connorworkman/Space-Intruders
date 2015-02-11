@@ -12,6 +12,8 @@ class PlayerLazer {
 		PlayerLazer();//set player lazer defaults
 		~PlayerLazer();
 		void setPlayerLazerPositX(int playerLocationWhenFiring);
+		int getPositX();
+		int getPositY();
 		void setFired(bool x);
 		bool getFired();	
 		bool move();
