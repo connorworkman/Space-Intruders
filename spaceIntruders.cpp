@@ -52,23 +52,15 @@ bool ImageTexture::loadFromFile(std::string path) {
 	sdlTextureHeight = loadedSurface->h;
 	SDL_FreeSurface(loadedSurface);//free old surface
 	sdlTexture = newTexture;
-	alienAnimationClips[0].x = 0;
-	alienAnimationClips[0].y = 0;
-	alienAnimationClips[0].w = 20;
-	alienAnimationClips[0].h = 14;
-	alienAnimationClips[1].x = 20;
-	alienAnimationClips[1].y = 0;
-	alienAnimationClips[1].w = 20;
-	alienAnimationClips[1].h = 14;
-	alienAnimationClips[2].x = 40;
-	alienAnimationClips[2].y = 0;
-	alienAnimationClips[2].w = 20;
-	alienAnimationClips[2].h = 14;
-	alienAnimationClips[3].x = 60;
-	alienAnimationClips[3].y = 0;
-	alienAnimationClips[3].w = 20;
-	alienAnimationClips[3].h = 14;
+
+	//alien animation clip data
+	alienAnimationClips[0].x =  0; alienAnimationClips[0].y = 0; alienAnimationClips[0].w = 20; alienAnimationClips[0].h = 14;
+	alienAnimationClips[1].x = 20; alienAnimationClips[1].y = 0; alienAnimationClips[1].w = 20; alienAnimationClips[1].h = 14;
+	alienAnimationClips[2].x = 40; alienAnimationClips[2].y = 0; alienAnimationClips[2].w = 20; alienAnimationClips[2].h = 14;
+	alienAnimationClips[3].x = 60; alienAnimationClips[3].y = 0; alienAnimationClips[3].w = 20; alienAnimationClips[3].h = 14;
+
 	//TODO playerAnimationClips[0].x  = 0;
+
 	return sdlTexture != NULL;
 }
 void ImageTexture::free() {
@@ -130,13 +122,9 @@ void Player::move() {
     }
 }
 
-int Player::getPlayerPositX() {
-	return playerPositX;
-}
+int Player::getPlayerPositX() {return playerPositX;}//player X position getter
 
-void Player::render() {
-	playerTexture.render(playerPositX, playerPositY);
-}
+void Player::render() {playerTexture.render(playerPositX, playerPositY);}//player renderer, TODO add clip argument when player is animated
 
 Alien::Alien() {
 	alienHorizontalPosit = 0;
@@ -167,13 +155,9 @@ PlayerLazer::PlayerLazer() {
 	this->playerLazerVelocY = 0;
 }
 
-PlayerLazer::~PlayerLazer() {
-	//empty destructor for PlayerLazer
-}
+PlayerLazer::~PlayerLazer() {}//empty destructor for PlayerLazer
 
-void PlayerLazer::setPlayerLazerPositX(int playerPositXWhenFiring) {
-	this->playerLazerPositX = playerPositXWhenFiring+5;
-}
+void PlayerLazer::setPlayerLazerPositX(int playerPositXWhenFiring) {this->playerLazerPositX = playerPositXWhenFiring+5;}//place PlayerLazer x coordinate
 
 bool PlayerLazer::move() {
 	playerLazerPositY -= playerLazerVelocY;
@@ -183,17 +167,11 @@ bool PlayerLazer::move() {
 	return true;
 }
 
-bool PlayerLazer::getFired() {
-	return this->fired;
-}
+bool PlayerLazer::getFired() {return this->fired;}//query the state of the PlayerLazer instance
 
-void PlayerLazer::setFired(bool x) {
-	this->fired = x;
-}
+void PlayerLazer::setFired(bool x) {this->fired = x;}//set the state of the PlayerLazer instance
 
-void PlayerLazer::setVelocY(int newVelocity) {
-	this->playerLazerVelocY = newVelocity;
-}
+void PlayerLazer::setVelocY(int newVelocity) {this->playerLazerVelocY = newVelocity;}//set lazer's vertical velocity
 
 void PlayerLazer::reset() {
 	this->fired = false;
@@ -202,9 +180,7 @@ void PlayerLazer::reset() {
 	this->playerLazerVelocY = 0;
 }
 
-void PlayerLazer::render() {
-	playerLazerTexture.render(playerLazerPositX, playerLazerPositY);
-}
+void PlayerLazer::render() {playerLazerTexture.render(playerLazerPositX, playerLazerPositY);}
 
 void init() {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -247,21 +223,9 @@ int main(int argc, char* args[]) {
 	bool quit = false;
 	SDL_Event event;
 	Player playerInstance;
-////////////////////////////////////////////////////playerlazer array here
 	int lazerCount = 10;
 	PlayerLazer playerLazerInstance[lazerCount];
-/////////////////////////////////////////////////////////////////////////
-/*	PlayerLazer playerLazerInstance;
-	PlayerLazer playerLazerInstance2;
-	PlayerLazer playerLazerInstance3;
-	PlayerLazer playerLazerInstance4;
-	PlayerLazer playerLazerInstance5;
-	PlayerLazer playerLazerInstance6;
-	PlayerLazer playerLazerInstance7;
-	PlayerLazer playerLazerInstance8;
-	PlayerLazer playerLazerInstance9;
-	PlayerLazer playerLazerInstance10;
-*/	int i = 0;
+	int i = 0;
 	int alienCount = 100;
 	Alien alienArray[alienCount];
 	for (i = 0; i < alienCount; i++) {
@@ -299,13 +263,16 @@ int main(int argc, char* args[]) {
 		m++;
 		if (m >= 40) {m=0;}
 		--scrollingOffset;
-		if(scrollingOffset < -backgroundTexture.getWidth()) {
+		if(scrollingOffset < -backgroundTexture.getHeight()) {
 			scrollingOffset = 0;
 		}
 		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(renderer);
-		backgroundTexture.render(scrollingOffset, 0);
-		backgroundTexture.render(scrollingOffset + backgroundTexture.getWidth(), 0);
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////changing to vertical scroll//////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		backgroundTexture.render(0, scrollingOffset);
+		backgroundTexture.render(0, scrollingOffset + backgroundTexture.getHeight());
 		playerInstance.render();
 
 		SDL_Rect* currentClip = &alienAnimationClips[frame/10];
