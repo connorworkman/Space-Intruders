@@ -32,7 +32,7 @@ ImageTexture backgroundTexture;
 //ImageTexture alienTexture;//this one is no longer in use
 ImageTexture playerLazerTexture;
 ImageTexture alienAnimationTexture;
-
+ImageTexture explosionTexture;//TODO explosion texture should be explosion animation
 SDL_Rect alienAnimationClips[ALIEN_ANIMATION_FRAMES];
 
 //TODO add explosion textures, enemy lazer textures?, additional different enemy textures (perhaps a seperate class for aliens that fire back)
@@ -142,9 +142,12 @@ Alien::Alien() {
 }
 
 void Alien::setAlienPosit(int alienNumber) {
-	alienHorizontalPosit = (((alienNumber/10))*30) + (SCREEN_WIDTH)/4 + 20;
+	alienHorizontalPosit = (((alienNumber/10))*45) + (SCREEN_WIDTH)/4 - 50;
 	alienVerticalPosit = ((alienNumber%10)+1)*30;
 }
+
+void Alien::setX(int x) {this->alienHorizontalPosit = x;}
+void Alien::setY(int y) {this->alienVerticalPosit = y;}
 
 int Alien::getAlienHorizontalPosit() {return this->alienHorizontalPosit;}
 
@@ -158,6 +161,11 @@ void Alien::move(int m) {
 	} else if (m>=5) {
 		this->alienHorizontalPosit += 1;
 	}
+}
+
+void Alien::hide() {
+	this->setX(-30);
+	this->setY(-30);
 }
 
 PlayerLazer::PlayerLazer() {
@@ -292,6 +300,8 @@ int main(int argc, char* args[]) {
 				alienArray[j].getAlienHorizontalPosit(), alienArray[j].getAlienVerticalPosit())) {
 					std::cout << "OBJECTS HAVE COLLIDED" << std::endl;
 					playerLazerInstance[i].reset();
+					//alienArray[j].explode();
+					alienArray[j].hide();
 				}
 			}
 		}
