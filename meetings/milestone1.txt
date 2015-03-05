@@ -1,0 +1,14 @@
+Milestone 1 - Connor Workman
+02/11/2015
+
+I am impressed with the progress I've made so far with Space Intruders.  The game is coming along much faster at this point than it was when I started.  I've added a Makefile to the public GitHub repo if you want to take a look at it (you just need the SDL2 libraries on your system) although it may or may not be necessary to change the includes in the C++ and header files to get it to run on a Mac (haven't tested on a mac yet).
+
+My milestone 1 goals were a bit over-the-top.  So far what I've managed to get running is a very primitive, easy-to-win, single game level, without any concept of scoring and many needed changes.  The thing that delayed me the most was getting the player's lazer-beams to be fired at a specific rate.  I got it functional at first with a horrendous amount of code repitition and unnecessary conditionals, and then I realized not too long ago that I could count frames with a simple int counter, incremented inside the main game loop, and adjust/allow things based on its value.
+
+I also managed to get the Alien 'Intruders' (which I drew myself, very crudely, with Gimp) animated and moving around in an automated fashion. The game certainly is not challenging yet, as the aliens don't fire back, but simply move horizontally, and slowly creep vertically towards the player, when the game is ended upon collision.
+Lots of TODO's left to take care of.
+
+I think I am certainly on track to accomplish the goals I set up before the end of the term, although I've only briefly looked into how an SDL game can be packaged for independent installation.  This will definitely be something I do once the game is fully functional, which hopefully will happen within 1-2 weeks. 
+
+TL;DR - Making lots of progress and beefing up my coding muscles.
+github.com/connorworkman/Space-Intruders
