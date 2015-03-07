@@ -19,6 +19,7 @@ class Game {
 		int mainGameLoop();
 		void incrementNextTime();
 		void main();
+		void mainMenu();
 	private:
 		int alienCount = 80;
 		int next_time;

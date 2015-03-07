@@ -8,14 +8,14 @@
 class Player {
 	public:
 		static const int PLAYER_WIDTH = 20;
-		static const int PLAYER_HEIGHT = 20;
+		static const int PLAYER_HEIGHT = 25;
 		static const int PLAYER_VEL = 5;
 		Player();
 		void handleEvent(SDL_Event& e);
 		void move();
 		int getX();
 		int getY();
-		void render();
+		void render(SDL_Rect* playerClip);
 	private:
 		int positX;
 		int positY;
