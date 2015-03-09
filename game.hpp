@@ -38,4 +38,5 @@ class Game {
 		bool wallHit;
 		int dropCount;
 		int imgFlags;
+		int score;
 };

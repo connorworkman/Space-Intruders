@@ -32,6 +32,8 @@ class Alien {
 		bool moveLazer();
 		void resetLazer();
 		int getLazerVelocY();
+		int getLazerPositX();
+		int getLazerPositY();
 	private:
 		AlienLazer aLazer;
 		bool collision;
