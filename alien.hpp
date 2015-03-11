@@ -10,7 +10,8 @@ class Alien {
 		static const int ALIEN_WIDTH = 40;
 		static const int ALIEN_HEIGHT = 28;
 		Alien();
-		void initAlienLayout(int i);
+		void levelOneAlienLayout(int i);
+		void levelTwoAlienLayout(int i);
 		void setX(int x);
 		void setY(int y);
 		int getX();

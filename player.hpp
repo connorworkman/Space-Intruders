@@ -16,6 +16,7 @@ class Player {
 		int getX();
 		int getY();
 		void render(SDL_Rect* playerClip);
+		void setVelocX(int newVelocity);
 	private:
 		int positX;
 		int positY;
