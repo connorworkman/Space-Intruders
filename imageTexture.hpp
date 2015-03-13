@@ -1,6 +1,5 @@
-/*	Space Intruders		*/
-/*    Author: Connor Workman	*/
-
+#ifndef IMAGETEXTURE_HPP
+#define IMAGETEXTURE_HPP
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -26,3 +25,4 @@ class ImageTexture {//SDL_Texture wrapper class
 		int sdlTextureWidth;
 		int sdlTextureHeight;
 };
+#endif

@@ -10,31 +10,44 @@ class Game {
 		Game(); // constructor calls init() and loadMedia() instantiates game variables
 		~Game();
 		/*void init();*/
-		void loadMedia();
+		
 		void close();
+
 		void getUserInput();
+		
 		void updateGameState();
+		void checkCollision();
+		void checkAlienHord();
+		void moveAlienHord();
+		void dropAlienHord();
+		void fireAlienLazers();
+		void moveAlienLazers();
+		void playSound();
+		
+		void main();
+		int mainGameLoop();
+		void loadMedia();
+		int time_left();
+		void incrementNextTime();
+
 		void drawGame();
 		void drawVictoryScreen();
 		void drawDeadScreen();
-		int time_left();
-		int mainGameLoop();
-		void incrementNextTime();
-		void main();
+		void drawPauseScreen();
+		
 		void mainMenu();
-		bool getRestart();
-		void setUpLevelTwo();
+		
 		void setRestart(bool x);
-		bool getVictory();
+		bool getRestart();
 		void setUpLevelOne();
+		void setUpLevelTwo();
+		void setUpLevelThree();
+		bool getVictory();
 		bool getDead();
-		void checkCollision();
-		void fireAlienLazers();
-		void checkAlienMove();
-		void moveAliens();
-		void moveAlienLazers();
-		void dropAliens();
+		int getLevel();
+
 	private:
+		int level;
 		int alienCount;
 		int alienFighterCount;
 		int next_time;
@@ -57,4 +70,5 @@ class Game {
 		int imgFlags;
 		int score;
 		bool restart;
+		bool pause;
 };

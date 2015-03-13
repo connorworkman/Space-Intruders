@@ -10,31 +10,37 @@ class Alien {
 		static const int ALIEN_WIDTH = 40;
 		static const int ALIEN_HEIGHT = 28;
 		Alien();
+
 		void levelOneAlienLayout(int i);
 		void levelTwoAlienLayout(int i);
+		void levelThreeAlienLayout(int i);
+
+		void resetLazer();
 		void setX(int x);
 		void setY(int y);
-		int getX();
-		int getY();
-		void drop();
-		void explode();
-		void hide();
 		void setCollisionState(bool x);
-		bool getCollisionState();
-		void move(int moveSpeed);
-		//void handleEvent(SDL_Event& e);//TODO implement explosion/destruction event when hit by playerLazer
-		void render(int x, int y, SDL_Rect* clip);
 		void setLazerX(int x);
 		void setLazerY(int y);
 		void setLazerVelocY(int newVelocity);
-		void fireLazer();
-		bool getFired();
-		void renderLazer();
-		bool moveLazer();
-		void resetLazer();
+
+		int getX();
+		int getY();
 		int getLazerVelocY();
 		int getLazerPositX();
 		int getLazerPositY();
+		bool getCollisionState();
+		bool getFired();
+
+		void fireLazer();
+		bool moveLazer();
+		void drop();
+		void explode();
+		void hide();
+		void move(int moveSpeed);
+		
+		void renderLazer();
+		void render(int x, int y, SDL_Rect* clip);
+
 	private:
 		AlienLazer aLazer;
 		bool collision;

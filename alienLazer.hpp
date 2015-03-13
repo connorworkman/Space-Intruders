@@ -8,17 +8,22 @@ class AlienLazer {
 		static const int DEFAULT_VELOCITY = 2;
 		AlienLazer();//set player lazer defaults
 		~AlienLazer();
+
 		void setX(int x);
 		void setY(int y);
+		void setVelocY(int y);
+
 		int getX();
 		int getY();
-		void fire();
-		bool getFired();	
-		bool move();
-		void setVelocY(int y);
-		void render();
-		void reset();
 		int getVelocY();
+		bool getFired();
+
+		void fire();
+		bool move();
+		void reset();
+		
+		void render();
+		
 	private:
 		bool fired;
 		int positX;
