@@ -40,8 +40,10 @@ SDL_Renderer* renderer = NULL;
 
 Mix_Chunk *lazerSound = NULL;
 Mix_Chunk *soundNote = NULL;
-
+Mix_Chunk *gameOverSound = NULL;
 //instantiate game textures
+ImageTexture dogeTexture;
+ImageTexture preMenuTexture;
 ImageTexture playerAnimationTexture;
 ImageTexture backgroundTexture;
 ImageTexture playerLazerTexture;
@@ -54,6 +56,9 @@ ImageTexture fighterTexture;
 ImageTexture scoreTexture;
 ImageTexture pointsTexture;
 ImageTexture pauseTexture;
+ImageTexture levelTwoVictoryTexture;
+ImageTexture levelThreeVictoryTexture;
+ImageTexture wowTexture;
 
 SDL_Rect alienClips[NUM_ANIMATION_FRAMES];
 SDL_Rect gameOverClips[GAMEOVER_FRAMES];
@@ -73,6 +78,20 @@ ImageTexture::ImageTexture() {
 	sdlTextureHeight = 0;
 }
 
+ImageTexture::~ImageTexture() {
+	free();
+}
+
+void ImageTexture::free() {
+	if(sdlTexture != NULL) {
+		//destroy texture and return all values back to defaults
+		SDL_DestroyTexture( sdlTexture );
+		sdlTexture = NULL;
+		sdlTextureWidth = 0;
+		sdlTextureHeight = 0;
+	}
+}
+
 bool ImageTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor) {
 	free();
 	SDL_Surface* loadedSurface = TTF_RenderText_Solid(font,textureText.c_str(),textColor);
@@ -81,10 +100,6 @@ bool ImageTexture::loadFromRenderedText(std::string textureText, SDL_Color textC
 	sdlTextureHeight = loadedSurface->h;
 	SDL_FreeSurface(loadedSurface);
 	return (sdlTexture != NULL);
-}
-
-ImageTexture::~ImageTexture() {
-	free();
 }
 
 bool ImageTexture::loadFromFile(std::string path) {
@@ -100,14 +115,12 @@ bool ImageTexture::loadFromFile(std::string path) {
 	return sdlTexture != NULL;
 }
 
-void ImageTexture::free() {
-	if(sdlTexture != NULL) {
-		//destroy texture and return all values back to defaults
-		SDL_DestroyTexture( sdlTexture );
-		sdlTexture = NULL;
-		sdlTextureWidth = 0;
-		sdlTextureHeight = 0;
-	}
+int ImageTexture::getWidth() {
+	return sdlTextureWidth;
+}
+
+int ImageTexture::getHeight() {
+	return sdlTextureHeight;
 }
 
 void ImageTexture::setColorMode(Uint8 red, Uint8 green, Uint8 blue) {
@@ -131,13 +144,6 @@ void ImageTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point*
 	SDL_RenderCopyEx(renderer, sdlTexture, clip, &renderRect, angle, center, flip);
 }
 
-int ImageTexture::getWidth() {
-	return sdlTextureWidth;
-}
-
-int ImageTexture::getHeight() {
-	return sdlTextureHeight;
-}
 
 
 Player::Player() {
@@ -519,7 +525,7 @@ Game::Game() {
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 	TTF_Init();
 
-	font = TTF_OpenFont("Munro.ttf", 20);
+	font = TTF_OpenFont("images/Munro.ttf", 20);
 	white = {255,255,255};
 	if (font == NULL) {
 		std::cout << "Failed to open font file." << std::endl;
@@ -631,6 +637,9 @@ Game::~Game() {
 	close();
 }
 void Game::loadMedia() {
+	if(!dogeTexture.loadFromFile("images/doge.bmp")) {
+		std::cout << "Couldn't load doge image." << std::endl;
+	}
 	if(!playerAnimationTexture.loadFromFile("images/player.bmp")) {
 		std::cout << "Couldn't load player.bmp" << std::endl;
 	}
@@ -658,17 +667,34 @@ void Game::loadMedia() {
 	if(!scoreTexture.loadFromRenderedText("Score:", white)) {
 		std::cout << "Couldn't load text." << std::endl;
 	}
-	if(!fighterTexture.loadFromFile("images/animatedFighter2.bmp")) {
+	if(!fighterTexture.loadFromFile("images/animatedFighter.bmp")) {
 		std::cout << "Couldn't load alienFghter image." << std::endl;
 	}
 	if(!pauseTexture.loadFromFile("images/spaceIntrudersMenu.bmp")) {
 		std::cout << "Couldn't load pause menu image."<< std::endl;
 	}
+	if(!levelTwoVictoryTexture.loadFromFile("images/victorylevel2.bmp")) {
+		std::cout << "Couldn't load lvl2 victory image." << std::endl;
+	}
+	if(!levelThreeVictoryTexture.loadFromFile("images/victorylevel3.bmp")) {
+		std::cout << "Couldn't load lvl3 victory image." << std::endl;
+	}
+	if(!preMenuTexture.loadFromFile("images/premenuscreen.bmp")) {
+		std::cout << "Couldn't load preMenu screen image." << std::endl;
+	}
+	if(!wowTexture.loadFromFile("images/wowLazer.bmp")) {
+		std::cout << "Couldn't load wow lazer image file." << std::endl;
+	}
 	soundNote = Mix_LoadWAV("sounds/beep.wav");
+	Mix_VolumeChunk(soundNote, 20);
 	if (soundNote == NULL) {
 		std::cout << "Couldn't load sound file." << std::endl;
 	}
 	lazerSound = Mix_LoadWAV("sounds/lazer.wav");
+	if (lazerSound == NULL) {
+		std::cout << "Couldn't load lazerSound file." << std::endl;
+	}
+	gameOverSound = Mix_LoadWAV("sounds/gameOver.wav");
 	if (lazerSound == NULL) {
 		std::cout << "Couldn't load lazerSound file." << std::endl;
 	}
@@ -718,6 +744,7 @@ void Game::checkCollision() {
 		
 		if (alienIterator->getY() >= SCREEN_HEIGHT - Player::PLAYER_HEIGHT - Alien::ALIEN_HEIGHT) {
 				dead = true;
+				Mix_PlayChannel(-1, gameOverSound, 0);
 				return;
 		}
 		//Check for Player-to-AlienLazer collision
@@ -727,6 +754,7 @@ void Game::checkCollision() {
 			&& player.getY() - Player::PLAYER_HEIGHT <= alienIterator->getLazerPositY())
 		{
 			dead = true;
+			Mix_PlayChannel(-1, gameOverSound, 0);
 			return;
 		}
 		
@@ -746,6 +774,7 @@ void Game::checkCollision() {
 		
 		if (fighterIterator->getY() >= SCREEN_HEIGHT - Player::PLAYER_HEIGHT - AlienFighter::ALIEN_HEIGHT) {
 				dead = true;
+				Mix_PlayChannel(-1, gameOverSound, 0);
 				return;
 		}
 		//Check for Player-to-AlienLazer collision
@@ -755,6 +784,7 @@ void Game::checkCollision() {
 			&& player.getY() - Player::PLAYER_HEIGHT <= fighterIterator->getLazerPositY())
 		{
 			dead = true;
+			Mix_PlayChannel(-1, gameOverSound, 0);
 			return;
 		}
 		
@@ -809,11 +839,16 @@ void Game::fireAlienLazers() {
 		int randomFightNum = rand() % alienFighterVector.size();
 		if (randomNum % 5 == 0) {//only use randoms that are equivalent to 0 mod 5
 			//decidedly, it is too difficult for the player if all aliens fire lazers
-			/*if (!alienVector[randomNum].getFired()) {
-				alienVector[randomNum].fireLazer();
-				alienVector[randomNum].setLazerX(alienVector[randomNum].getX()+(Alien::ALIEN_WIDTH/2));
-				alienVector[randomNum].setLazerY(alienVector[randomNum].getY()+(Alien::ALIEN_HEIGHT));
-			}*/
+			if (level == 4) {
+				if (!alienVector.empty()) {
+					if (!alienVector[randomNum].getFired()) {
+						alienVector[randomNum].fireLazer();
+						alienVector[randomNum].setLazerX(alienVector[randomNum].getX()+(Alien::ALIEN_WIDTH/2));
+						alienVector[randomNum].setLazerY(alienVector[randomNum].getY()+(Alien::ALIEN_HEIGHT));
+					}
+				}
+			}
+
 			if (!alienFighterVector[randomFightNum].getFired()) {
 				alienFighterVector[randomFightNum].fireLazer();
 				alienFighterVector[randomFightNum].setLazerX(alienFighterVector[randomFightNum].getX()+(AlienFighter::ALIEN_WIDTH/2));
@@ -983,8 +1018,15 @@ void Game::drawVictoryScreen() {
 		backgroundTexture.render(0, scrollingOffset + backgroundTexture.getHeight());
 		scoreTexture.render(SCREEN_WIDTH-scoreTexture.getWidth()-70,SCREEN_HEIGHT-scoreTexture.getHeight());
 		pointsTexture.render(SCREEN_WIDTH-pointsTexture.getWidth(),SCREEN_HEIGHT-pointsTexture.getHeight());
-		SDL_Rect* youWinClip = &youWinClips[victoryFrame/VICTORY_ANIMATION_FRAMES];
-		youWinTexture.render(0,0,youWinClip);
+		if (level == 1) {
+			SDL_Rect* youWinClip = &youWinClips[victoryFrame/VICTORY_ANIMATION_FRAMES];
+			youWinTexture.render(0,0,youWinClip);
+		} else if (level == 2) {
+			levelTwoVictoryTexture.render(0,0);
+		} else {
+			level = 4;
+			levelThreeVictoryTexture.render(0,0);
+		}
 		++frame;
 		++victoryFrame;
 		if (victoryFrame/VICTORY_ANIMATION_FRAMES == VICTORY_ANIMATION_FRAMES) {
@@ -1074,9 +1116,17 @@ void Game::drawGame() {
 		}
 		for (fighterIterator = alienFighterVector.begin(); fighterIterator != alienFighterVector.end(); ++fighterIterator) {
 			if (fighterIterator->getFired()) {
-				fighterIterator->renderLazer();
+				if (level !=4) {
+					fighterIterator->renderLazer();
+				} else {
+					wowTexture.render(fighterIterator->getLazerPositX(), fighterIterator->getLazerPositY());
+				}
 			}
-			fighterIterator->render(fighterIterator->getX(), fighterIterator->getY(), currentFighterClip);
+			if (level == 4) {
+				dogeTexture.render(fighterIterator->getX(), fighterIterator->getY());
+			} else {
+				fighterIterator->render(fighterIterator->getX(), fighterIterator->getY(), currentFighterClip);
+			}
 		}
 		if (pLazer.getFired()) {
 			pLazer.render();
@@ -1187,11 +1237,12 @@ void Game::setUpLevelThree() {
 	wallHit = false;
 	dead = false;
 	victory = false;
-	score = 0;
-	level = 3;
+	if (level != 4) {
+		level = 3;
+	}
 }
 
-void Game::mainMenu() {
+void Game::mainMenu(bool preMenuOnly) {
 	bool enter = false;
 	int menuFrame = 0;
 	while(!enter) {
@@ -1199,10 +1250,14 @@ void Game::mainMenu() {
 		SDL_RenderClear(renderer);
 		backgroundTexture.render(0, scrollingOffset);
 		backgroundTexture.render(0, scrollingOffset + backgroundTexture.getHeight());
-		SDL_Rect* mainMenuClip = &menuClips[menuFrame/MENU_ANIMATION_FRAMES];
-		mainMenuTexture.render(0,0,mainMenuClip);
+		if (!preMenuOnly) {
+			SDL_Rect* mainMenuClip = &menuClips[menuFrame/MENU_ANIMATION_FRAMES];
+			mainMenuTexture.render(0,0,mainMenuClip);
+			++menuFrame;
+		} else {
+			preMenuTexture.render(0,0);
+		}
 		++frame;
-		++menuFrame;
 		//reset counters if limit reached
 		if (menuFrame/MENU_ANIMATION_FRAMES == MENU_ANIMATION_FRAMES) {
 			menuFrame = 0;
@@ -1278,8 +1333,9 @@ void Game::main() {
 
 int main(int argc, char* args[]) {
 	Game g;
-	//if (restart) {g.setUpLevelTwo();}
-	g.mainMenu();
+	
+	g.mainMenu(true);
+	g.mainMenu(false);
 	do {
 		g.setRestart(false);
 		g.main();
@@ -1293,7 +1349,7 @@ int main(int argc, char* args[]) {
 			}
 			if (g.getDead()) {
 				if (g.getLevel() == 1) {
-					g.setUpLevelOne();//set to lv3 for testing///////////////////////////////////////////////////////////////////////////////
+					g.setUpLevelOne();
 				} else if (g.getLevel() == 2){
 					g.setUpLevelTwo();
 				} else {

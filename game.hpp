@@ -35,9 +35,9 @@ class Game {
 		void drawDeadScreen();
 		void drawPauseScreen();
 		
-		void mainMenu();
+		void mainMenu(bool preMenuOnly);
 		
-		void setRestart(bool x);
+		void setRestart(bool restartSetting);
 		bool getRestart();
 		void setUpLevelOne();
 		void setUpLevelTwo();
