@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <string.h>
-
+#include <iostream>
 class ImageTexture {//SDL_Texture wrapper class
 	public:
 		ImageTexture();

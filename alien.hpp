@@ -1,15 +1,18 @@
-/*	Space Intruders		*/
+/*  	Space Intruders	    	*/
 /*    Author: Connor Workman	*/
-
+#ifndef _ALIEN_HPP
+#define _ALIEN_HPP
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-	
+#include "alienLazer.hpp"
+#include "imageTexture.hpp"	
 class Alien {
 	public:
 		static const int ALIEN_WIDTH = 40;
 		static const int ALIEN_HEIGHT = 28;
 		Alien();
+		~Alien();
 
 		void levelOneAlienLayout(int i);
 		void levelTwoAlienLayout(int i);
@@ -30,6 +33,7 @@ class Alien {
 		int getLazerPositY();
 		bool getCollisionState();
 		bool getFired();
+		
 
 		void fireLazer();
 		bool moveLazer();
@@ -46,4 +50,7 @@ class Alien {
 		bool collision;
 		int positX;
 		int positY;
+
 };
+
+#endif 

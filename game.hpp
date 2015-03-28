@@ -1,6 +1,7 @@
 /*	Space Intruders		*/
 /*    Author: Connor Workman	*/
-
+#ifndef _GAME_HPP
+#define _GAME_HPP
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -72,3 +73,4 @@ class Game {
 		bool restart;
 		bool pause;
 };
+#endif

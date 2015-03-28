@@ -1,3 +1,6 @@
+#ifndef _ALIEN_LAZER_HPP
+#define _ALIEN_LAZER_HPP
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
@@ -30,3 +33,4 @@ class AlienLazer {
 		int positY;
 		int velocY;
 };
+#endif

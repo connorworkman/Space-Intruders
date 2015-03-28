@@ -37,40 +37,40 @@ const int TICK_INTERVAL = 20;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
-
 Mix_Chunk *lazerSound = NULL;
 Mix_Chunk *soundNote = NULL;
 Mix_Chunk *gameOverSound = NULL;
 //instantiate game textures
 ImageTexture dogeTexture;
 ImageTexture preMenuTexture;
-ImageTexture playerAnimationTexture;
 ImageTexture backgroundTexture;
-ImageTexture playerLazerTexture;
-ImageTexture alienAnimationTexture;
-ImageTexture gameOverTexture;
-ImageTexture youWinTexture;
 ImageTexture alienLazerTexture;
-ImageTexture mainMenuTexture;
-ImageTexture fighterTexture;
 ImageTexture scoreTexture;
 ImageTexture pointsTexture;
-ImageTexture pauseTexture;
 ImageTexture levelTwoVictoryTexture;
 ImageTexture levelThreeVictoryTexture;
 ImageTexture wowTexture;
 
+ImageTexture alienAnimationTexture;
 SDL_Rect alienClips[NUM_ANIMATION_FRAMES];
+
+ImageTexture gameOverTexture;
 SDL_Rect gameOverClips[GAMEOVER_FRAMES];
+
+ImageTexture youWinTexture;
 SDL_Rect youWinClips[VICTORY_ANIMATION_FRAMES];
-SDL_Rect playerClips[NUM_ANIMATION_FRAMES];
+
+ImageTexture mainMenuTexture;
 SDL_Rect menuClips[MENU_ANIMATION_FRAMES];
+
+ImageTexture fighterTexture;
 SDL_Rect fighterClips[NUM_ANIMATION_FRAMES];
+
+ImageTexture pauseTexture;
 SDL_Rect pauseClips[MENU_ANIMATION_FRAMES];
 
 SDL_Color white;
 TTF_Font *font;
-
 
 ImageTexture::ImageTexture() {
 	sdlTexture = NULL;
@@ -144,114 +144,12 @@ void ImageTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point*
 	SDL_RenderCopyEx(renderer, sdlTexture, clip, &renderRect, angle, center, flip);
 }
 
-
-
-Player::Player() {
-    positX = (SCREEN_WIDTH/2)-this->PLAYER_WIDTH;
-    positY = SCREEN_HEIGHT-this->PLAYER_HEIGHT;
-    velocX = 0;
-}
-
-void Player::handleEvent( SDL_Event& event ) {
-	if(event.type == SDL_KEYDOWN && event.key.repeat == 0) {//keypress occurrs
-       	switch(event.key.keysym.sym ) {
-			case SDLK_LEFT:
-				velocX -= PLAYER_VEL;
-				break;
-			case SDLK_RIGHT:
-				velocX += PLAYER_VEL;
-				break;
-    	}
-	}
-	else if(event.type == SDL_KEYUP && event.key.repeat == 0) {//keypress is released
-		switch(event.key.keysym.sym) {
-			case SDLK_LEFT:
-				velocX += PLAYER_VEL;
-				break;
-			case SDLK_RIGHT:
-				velocX -= PLAYER_VEL;
-				break;
-    	}
-	}
-}
-
-void Player::move() {
-    positX += velocX;
-    //keep the player on the screen by correcting by velocX
-    if((positX < 0) || (positX + PLAYER_WIDTH > SCREEN_WIDTH)) {
-        positX -= velocX;
-    }
-}
-
-int Player::getX() {
-	return positX;
-}//player X position getter
-
-int Player::getY() {
-	return positY;
-}//player Y position getter
-
-void Player::render(SDL_Rect* playerClip) {
-	playerAnimationTexture.render(positX, positY, playerClip);
-}
-
-void Player::setVelocX(int newVelocity) {
-	this->velocX = newVelocity;
-}
-
-PlayerLazer::PlayerLazer() {
-	this->fired = false;
-	this->positX = 0;
-	this->positY = SCREEN_HEIGHT - Player::PLAYER_HEIGHT;
-	this->velocY = 0;
-}
-
-PlayerLazer::~PlayerLazer() {}//empty destructor for PlayerLazer
-void PlayerLazer::setX(int x) {
-	this->positX = x+8;
-}//place PlayerLazer x coordinate
-
-int PlayerLazer::getX() {
-	return this->positX;
-}
-
-int PlayerLazer::getY() {
-	return this->positY;
-}
-
-bool PlayerLazer::move() {
-	positY -= velocY;
-	if (positY-LAZER_HEIGHT < 0) {//if lazer goes off screen
-		return false;//return false so we can reset it
-	}
-	return true;
-}
-
-bool PlayerLazer::getFired() {
-	return this->fired;
-}//query the state of the PlayerLazer instance
-
-void PlayerLazer::fire() {
-	this->fired = true;
-	this->velocY = PlayerLazer::DEFAULT_VELOCITY;
-}
-
-void PlayerLazer::setVelocY(int newVelocity) {
-	this->velocY = newVelocity;
-}//set lazer's vertical velocity
-
-void PlayerLazer::reset() {
-	this->fired = false;
-	this->positY = SCREEN_HEIGHT - Player::PLAYER_HEIGHT;
-	this->positX = 0;
-	this->velocY = 0;
-}
-
-void PlayerLazer::render() {
-	playerLazerTexture.render(positX, positY);
-}
-
 Alien::Alien() {
+	positX = 0;
+	positY = 0;
+	collision = false;	
+}
+Alien::~Alien() {
 	positX = 0;
 	positY = 0;
 	collision = false;
@@ -259,20 +157,20 @@ Alien::Alien() {
 
 void Alien::levelOneAlienLayout(int i) {
 	int aliensPerRow = 8;
-	this->positX = 60 + (i % aliensPerRow)*(20 + Alien::ALIEN_WIDTH);
-	this->positY = 110 + (i / aliensPerRow)*(5 + Alien::ALIEN_HEIGHT);
+	this->positX = 60 + (i % aliensPerRow)*(20 + ALIEN_WIDTH);
+	this->positY = 110 + (i / aliensPerRow)*(5 + ALIEN_HEIGHT);
 }
 
 void Alien::levelTwoAlienLayout(int i) {
 	int aliensPerRow = 9;
-	this->positX = 60 + (i % aliensPerRow)*(20 + Alien::ALIEN_WIDTH);
-	this->positY = 110 + (i / aliensPerRow)*(5 + Alien::ALIEN_HEIGHT);
+	this->positX = 60 + (i % aliensPerRow)*(20 + ALIEN_WIDTH);
+	this->positY = 110 + (i / aliensPerRow)*(5 + ALIEN_HEIGHT);
 }
 
 void Alien::levelThreeAlienLayout(int i) {
 	int aliensPerRow = 8;
-	this->positX = 60 + (i % aliensPerRow)*(20 + Alien::ALIEN_WIDTH);
-	this->positY = 140 + (i / aliensPerRow)*(5 + Alien::ALIEN_HEIGHT);
+	this->positX = 60 + (i % aliensPerRow)*(20 + ALIEN_WIDTH);
+	this->positY = 140 + (i / aliensPerRow)*(5 + ALIEN_HEIGHT);
 }
 
 void Alien::setX(int x) {
@@ -350,6 +248,7 @@ int Alien::getLazerPositX() {
 int Alien::getLazerPositY() {
 	return this->aLazer.getY();
 }
+
 AlienLazer::AlienLazer() {
 	this->fired = false;
 	this->positX = 0;
@@ -579,16 +478,12 @@ Game::Game() {
 	pauseClips[4].x = SCREEN_WIDTH*4; pauseClips[4].y = 0; pauseClips[4].w = SCREEN_WIDTH; pauseClips[4].h = SCREEN_HEIGHT;
 	pauseClips[5].x = SCREEN_WIDTH*5; pauseClips[5].y = 0; pauseClips[5].w = SCREEN_WIDTH; pauseClips[5].h = SCREEN_HEIGHT;
 
-	playerClips[0].x = 0;                      playerClips[0].y = 0; playerClips[0].w = Player::PLAYER_WIDTH; playerClips[0].h = Player::PLAYER_HEIGHT;
-	playerClips[1].x = Player::PLAYER_WIDTH;   playerClips[1].y = 0; playerClips[1].w = Player::PLAYER_WIDTH; playerClips[1].h = Player::PLAYER_HEIGHT;
-	playerClips[2].x = Player::PLAYER_WIDTH*2; playerClips[2].y = 0; playerClips[2].w = Player::PLAYER_WIDTH; playerClips[2].h = Player::PLAYER_HEIGHT;
-	playerClips[3].x = Player::PLAYER_WIDTH*3; playerClips[3].y = 0; playerClips[3].w = Player::PLAYER_WIDTH; playerClips[3].h = Player::PLAYER_HEIGHT;
-
-	//alien animation clip data
-	alienClips[0].x = 0;                    alienClips[0].y = 0; alienClips[0].w = Alien::ALIEN_WIDTH; alienClips[0].h = Alien::ALIEN_HEIGHT;
+	alienClips[0].x = 0;                   alienClips[0].y = 0; alienClips[0].w = Alien::ALIEN_WIDTH; alienClips[0].h = Alien::ALIEN_HEIGHT;
 	alienClips[1].x = Alien::ALIEN_WIDTH;   alienClips[1].y = 0; alienClips[1].w = Alien::ALIEN_WIDTH; alienClips[1].h = Alien::ALIEN_HEIGHT;
 	alienClips[2].x = Alien::ALIEN_WIDTH*2; alienClips[2].y = 0; alienClips[2].w = Alien::ALIEN_WIDTH; alienClips[2].h = Alien::ALIEN_HEIGHT;
 	alienClips[3].x = Alien::ALIEN_WIDTH*3; alienClips[3].y = 0; alienClips[3].w = Alien::ALIEN_WIDTH; alienClips[3].h = Alien::ALIEN_HEIGHT;
+
+
 
 	fighterClips[0].x = 0;                           fighterClips[0].y = 0; fighterClips[0].w = AlienFighter::ALIEN_WIDTH; fighterClips[0].h = AlienFighter::ALIEN_HEIGHT;
 	fighterClips[1].x = AlienFighter::ALIEN_WIDTH;   fighterClips[1].y = 0; fighterClips[1].w = AlienFighter::ALIEN_WIDTH; fighterClips[1].h = AlienFighter::ALIEN_HEIGHT;
@@ -640,18 +535,14 @@ void Game::loadMedia() {
 	if(!dogeTexture.loadFromFile("images/doge.bmp")) {
 		std::cout << "Couldn't load doge image." << std::endl;
 	}
-	if(!playerAnimationTexture.loadFromFile("images/player.bmp")) {
-		std::cout << "Couldn't load player.bmp" << std::endl;
-	}
+	
 	if(!backgroundTexture.loadFromFile("images/space.png")) {
 		std::cout << "Couldn't load space.png" << std::endl;
 	}
 	if(!gameOverTexture.loadFromFile("images/gameOver.bmp")) {
 		std::cout << "Couldn't load gameOver.bmp" << std::endl;
 	}
-	if(!playerLazerTexture.loadFromFile("images/playerLazer.bmp")) {
-		std::cout << "Couldn't load playerLazer.bmp" << std::endl;
-	}
+	
 	if(!alienAnimationTexture.loadFromFile("images/animatedalien.bmp")) {
 		std::cout << "Couldn't load animatedalien.bmp" << std::endl;
 	}
@@ -664,11 +555,17 @@ void Game::loadMedia() {
 	if(!mainMenuTexture.loadFromFile("images/spaceIntrudersMenu.bmp")) {
 		std::cout << "Couldn't load menu overlay." << std::endl;
 	}
+	if(!pLazer.loadPlayerLazerTexture()) {
+		std::cout << "Couldn't load playerLazer.bmp" << std::endl;
+	}
 	if(!scoreTexture.loadFromRenderedText("Score:", white)) {
 		std::cout << "Couldn't load text." << std::endl;
 	}
 	if(!fighterTexture.loadFromFile("images/animatedFighter.bmp")) {
 		std::cout << "Couldn't load alienFghter image." << std::endl;
+	}
+	if(!player.loadPlayerTexture()) {
+		std::cout << "Couldn't load player.bmp" << std::endl;
 	}
 	if(!pauseTexture.loadFromFile("images/spaceIntrudersMenu.bmp")) {
 		std::cout << "Couldn't load pause menu image."<< std::endl;
@@ -705,10 +602,8 @@ void Game::close() {
 	Mix_FreeChunk(soundNote);
 	Mix_FreeChunk(lazerSound);
 	fighterTexture.free();
-	playerAnimationTexture.free();
 	backgroundTexture.free();	
 	alienAnimationTexture.free();
-	playerLazerTexture.free();	
 	gameOverTexture.free();
 	youWinTexture.free();
 	alienLazerTexture.free();
@@ -1059,7 +954,7 @@ void Game::drawDeadScreen() {
 		SDL_Rect* currentFighterClip = &fighterClips[frame/FRAME_RATE];
 		//render each alien in the vector
 		for ( alienIterator = alienVector.begin(); alienIterator != alienVector.end(); ++ alienIterator ) {
-			alienIterator -> render( alienIterator->getX(), alienIterator->getY(), currentAlienClip);
+			alienIterator->render(alienIterator->getX(), alienIterator->getY(), currentAlienClip);
 		}
 		for (fighterIterator = alienFighterVector.begin(); fighterIterator != alienFighterVector.end(); ++fighterIterator) {
 			fighterIterator->render(fighterIterator->getX(), fighterIterator->getY(), currentFighterClip);
@@ -1102,7 +997,7 @@ void Game::drawGame() {
 		drawPauseScreen();
 	}
 	if (!dead && !victory && !pause) {
-		SDL_Rect* playerClip = &playerClips[frame/FRAME_RATE];
+		SDL_Rect* playerClip =  player.getPlayerClip(frame, FRAME_RATE);//&playerClips[frame/FRAME_RATE];
 		player.render(playerClip);
 		//set the alien current clip
 		SDL_Rect* currentAlienClip = &alienClips[frame/FRAME_RATE];	

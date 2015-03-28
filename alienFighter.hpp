@@ -1,6 +1,7 @@
 /*	Space Intruders		*/
 /*    Author: Connor Workman	*/
-
+#ifndef _ALIEN_FIGHTER_HPP
+#define _ALIEN_FIGHTER_HPP
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -48,3 +49,4 @@ class AlienFighter {
 		int positX;
 		int positY;
 };
+#endif
