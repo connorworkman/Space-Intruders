@@ -1,5 +1,0 @@
-Added since last meeting update:
-
-Lazer sound effect.
-Alien layout for level 3.
-Alien movement sound effect which increases in rate as the aliens die or as the dropCount increases.

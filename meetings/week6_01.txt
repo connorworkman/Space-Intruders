@@ -1,9 +1,0 @@
-PlayerLazer functions added: 
-	reset()
-	getters/setters for private data member (bool) "fired" which makes it 
-		...impossible for more than one playerLazer instance to be in play at any one time.
-
-main function altered
-	the playerLazer instance will be reset when it moves past the top of the SDL window.
-
-TODO: allow multiple lazers to be fired before resetting, and then reuse the instances once they've been reset
