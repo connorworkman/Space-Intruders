@@ -230,7 +230,7 @@ void Alien::renderLazer() {
 }
 
 bool Alien::moveLazer() {
-	this->aLazer.move();
+	return this->aLazer.move();
 }
 
 void Alien::resetLazer() {
@@ -376,7 +376,7 @@ void AlienFighter::renderLazer() {
 }
 
 bool AlienFighter::moveLazer() {
-	this->aLazer.move();
+	return this->aLazer.move();
 }
 
 void AlienFighter::resetLazer() {
